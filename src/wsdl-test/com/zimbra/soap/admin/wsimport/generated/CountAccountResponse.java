@@ -5,21 +5,20 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for adminAttrsImpl complex type.
+ * <p>Java class for countAccountResponse complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="adminAttrsImpl">
+ * &lt;complexType name="countAccountResponse">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element ref="{urn:zimbraAdmin}a" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="cos" type="{urn:zimbraAdmin}cosCountInfo" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,51 +28,40 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "adminAttrsImpl", propOrder = {
-    "a"
+@XmlType(name = "countAccountResponse", propOrder = {
+    "cos"
 })
-@XmlSeeAlso({
-    ModifyDomainRequest.class,
-    CreateDomainRequest.class,
-    GetAllConfigResponse.class,
-    ModifyConfigRequest.class,
-    ModifyCosRequest.class,
-    GetConfigResponse.class,
-    CreateServerRequest.class,
-    ModifyServerRequest.class,
-    ModifyAccountRequest.class
-})
-public abstract class AdminAttrsImpl {
+public class CountAccountResponse {
 
-    protected List<Attr> a;
+    protected List<CosCountInfo> cos;
 
     /**
-     * Gets the value of the a property.
+     * Gets the value of the cos property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the a property.
+     * This is why there is not a <CODE>set</CODE> method for the cos property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getA().add(newItem);
+     *    getCos().add(newItem);
      * </pre>
      * 
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link Attr }
+     * {@link CosCountInfo }
      * 
      * 
      */
-    public List<Attr> getA() {
-        if (a == null) {
-            a = new ArrayList<Attr>();
+    public List<CosCountInfo> getCos() {
+        if (cos == null) {
+            cos = new ArrayList<CosCountInfo>();
         }
-        return this.a;
+        return this.cos;
     }
 
 }
