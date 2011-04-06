@@ -1,5 +1,5 @@
 
-package com.zimbra.soap.account.wsimport.generated;
+package com.zimbra.soap.admin.wsimport.generated;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -8,18 +8,18 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for newIdentity complex type.
+ * <p>Java class for sectionAttr complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="newIdentity">
+ * &lt;complexType name="sectionAttr">
  *   &lt;complexContent>
- *     &lt;extension base="{urn:zimbraAccount}attrsImpl">
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *       &lt;/sequence>
- *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *     &lt;/extension>
+ *       &lt;attribute name="section" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
@@ -27,36 +27,34 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "newIdentity")
-public class NewIdentity
-    extends AttrsImpl
-{
+@XmlType(name = "sectionAttr", namespace = "urn:zimbra")
+public class SectionAttr {
 
     @XmlAttribute(required = true)
-    protected String name;
+    protected String section;
 
     /**
-     * Gets the value of the name property.
+     * Gets the value of the section property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getName() {
-        return name;
+    public String getSection() {
+        return section;
     }
 
     /**
-     * Sets the value of the name property.
+     * Sets the value of the section property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setName(String value) {
-        this.name = value;
+    public void setSection(String value) {
+        this.section = value;
     }
 
 }
