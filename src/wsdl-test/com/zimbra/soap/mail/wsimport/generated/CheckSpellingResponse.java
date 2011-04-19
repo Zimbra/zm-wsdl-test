@@ -1,5 +1,5 @@
 
-package com.zimbra.soap.admin.wsimport.generated;
+package com.zimbra.soap.mail.wsimport.generated;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,18 +10,18 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for contactMetaData complex type.
+ * <p>Java class for checkSpellingResponse complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="contactMetaData">
+ * &lt;complexType name="checkSpellingResponse">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element ref="{urn:zimbraAdmin}a" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="misspelled" type="{urn:zimbraMail}misSpelledWord" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="section" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="available" type="{http://www.w3.org/2001/XMLSchema}boolean" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -30,66 +30,66 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "contactMetaData", propOrder = {
-    "a"
+@XmlType(name = "checkSpellingResponse", propOrder = {
+    "misspelled"
 })
-public class ContactMetaData {
+public class CheckSpellingResponse {
 
-    protected List<Attr> a;
+    protected List<MisSpelledWord> misspelled;
     @XmlAttribute
-    protected String section;
+    protected Boolean available;
 
     /**
-     * Gets the value of the a property.
+     * Gets the value of the misspelled property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the a property.
+     * This is why there is not a <CODE>set</CODE> method for the misspelled property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getA().add(newItem);
+     *    getMisspelled().add(newItem);
      * </pre>
      * 
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link Attr }
+     * {@link MisSpelledWord }
      * 
      * 
      */
-    public List<Attr> getA() {
-        if (a == null) {
-            a = new ArrayList<Attr>();
+    public List<MisSpelledWord> getMisspelled() {
+        if (misspelled == null) {
+            misspelled = new ArrayList<MisSpelledWord>();
         }
-        return this.a;
+        return this.misspelled;
     }
 
     /**
-     * Gets the value of the section property.
+     * Gets the value of the available property.
      * 
      * @return
      *     possible object is
-     *     {@link String }
+     *     {@link Boolean }
      *     
      */
-    public String getSection() {
-        return section;
+    public Boolean isAvailable() {
+        return available;
     }
 
     /**
-     * Sets the value of the section property.
+     * Sets the value of the available property.
      * 
      * @param value
      *     allowed object is
-     *     {@link String }
+     *     {@link Boolean }
      *     
      */
-    public void setSection(String value) {
-        this.section = value;
+    public void setAvailable(Boolean value) {
+        this.available = value;
     }
 
 }

@@ -1,5 +1,5 @@
 
-package com.zimbra.soap.mail.wsimport.generated;
+package com.zimbra.soap.admin.wsimport.generated;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
@@ -7,12 +7,12 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for sortBy.
+ * <p>Java class for srchSortBy.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
  * <pre>
- * &lt;simpleType name="sortBy">
+ * &lt;simpleType name="srchSortBy">
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
  *     &lt;enumeration value="dateDesc"/>
  *     &lt;enumeration value="dateAsc"/>
@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;enumeration value="durAsc"/>
  *     &lt;enumeration value="none"/>
  *     &lt;enumeration value="taskDueAsc"/>
- *     &lt;enumeration value="taskStatusDesc"/>
+ *     &lt;enumeration value="taskDueDesc"/>
  *     &lt;enumeration value="taskStatusAsc"/>
  *     &lt;enumeration value="taskStatusDesc"/>
  *     &lt;enumeration value="taskPercCompletedAsc"/>
@@ -34,9 +34,9 @@ import javax.xml.bind.annotation.XmlType;
  * </pre>
  * 
  */
-@XmlType(name = "sortBy")
+@XmlType(name = "srchSortBy", namespace = "urn:zimbra")
 @XmlEnum
-public enum SortBy {
+public enum SrchSortBy {
 
     @XmlEnumValue("dateDesc")
     DATE_DESC("dateDesc"),
@@ -58,17 +58,19 @@ public enum SortBy {
     NONE("none"),
     @XmlEnumValue("taskDueAsc")
     TASK_DUE_ASC("taskDueAsc"),
-    @XmlEnumValue("taskStatusDesc")
-    TASK_STATUS_DESC("taskStatusDesc"),
+    @XmlEnumValue("taskDueDesc")
+    TASK_DUE_DESC("taskDueDesc"),
     @XmlEnumValue("taskStatusAsc")
     TASK_STATUS_ASC("taskStatusAsc"),
+    @XmlEnumValue("taskStatusDesc")
+    TASK_STATUS_DESC("taskStatusDesc"),
     @XmlEnumValue("taskPercCompletedAsc")
     TASK_PERC_COMPLETED_ASC("taskPercCompletedAsc"),
     @XmlEnumValue("taskPercCompletedDesc")
     TASK_PERC_COMPLETED_DESC("taskPercCompletedDesc");
     private final String value;
 
-    SortBy(String v) {
+    SrchSortBy(String v) {
         value = v;
     }
 
@@ -76,8 +78,8 @@ public enum SortBy {
         return value;
     }
 
-    public static SortBy fromValue(String v) {
-        for (SortBy c: SortBy.values()) {
+    public static SrchSortBy fromValue(String v) {
+        for (SrchSortBy c: SrchSortBy.values()) {
             if (c.value.equals(v)) {
                 return c;
             }
