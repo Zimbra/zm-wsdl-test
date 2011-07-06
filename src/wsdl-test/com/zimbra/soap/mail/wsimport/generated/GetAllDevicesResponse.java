@@ -5,25 +5,20 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for addMsgResponse complex type.
+ * <p>Java class for getAllDevicesResponse complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="addMsgResponse">
+ * &lt;complexType name="getAllDevicesResponse">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;choice maxOccurs="unbounded" minOccurs="0">
- *           &lt;element name="chat" type="{urn:zimbraMail}chatSummary"/>
- *           &lt;element name="m" type="{urn:zimbraMail}messageSummary"/>
- *         &lt;/choice>
+ *         &lt;element name="device" type="{urn:zimbraMail}deviceInfo" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -33,45 +28,40 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "addMsgResponse", propOrder = {
-    "chatOrM"
+@XmlType(name = "getAllDevicesResponse", propOrder = {
+    "device"
 })
-public class AddMsgResponse {
+public class GetAllDevicesResponse {
 
-    @XmlElements({
-        @XmlElement(name = "chat", type = ChatSummary.class),
-        @XmlElement(name = "m")
-    })
-    protected List<MessageSummary> chatOrM;
+    protected List<DeviceInfo> device;
 
     /**
-     * Gets the value of the chatOrM property.
+     * Gets the value of the device property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the chatOrM property.
+     * This is why there is not a <CODE>set</CODE> method for the device property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getChatOrM().add(newItem);
+     *    getDevice().add(newItem);
      * </pre>
      * 
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link ChatSummary }
-     * {@link MessageSummary }
+     * {@link DeviceInfo }
      * 
      * 
      */
-    public List<MessageSummary> getChatOrM() {
-        if (chatOrM == null) {
-            chatOrM = new ArrayList<MessageSummary>();
+    public List<DeviceInfo> getDevice() {
+        if (device == null) {
+            device = new ArrayList<DeviceInfo>();
         }
-        return this.chatOrM;
+        return this.device;
     }
 
 }
