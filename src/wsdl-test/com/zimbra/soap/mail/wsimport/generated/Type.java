@@ -1,5 +1,5 @@
 
-package com.zimbra.soap.admin.wsimport.generated;
+package com.zimbra.soap.mail.wsimport.generated;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
@@ -7,31 +7,31 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for pubShareInfoAction.
+ * <p>Java class for type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
  * <pre>
- * &lt;simpleType name="pubShareInfoAction">
+ * &lt;simpleType name="type">
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
- *     &lt;enumeration value="add"/>
- *     &lt;enumeration value="remove"/>
+ *     &lt;enumeration value="user"/>
+ *     &lt;enumeration value="system"/>
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
  * 
  */
-@XmlType(name = "pubShareInfoAction")
+@XmlType(name = "type")
 @XmlEnum
-public enum PubShareInfoAction {
+public enum Type {
 
-    @XmlEnumValue("add")
-    ADD("add"),
-    @XmlEnumValue("remove")
-    REMOVE("remove");
+    @XmlEnumValue("user")
+    USER("user"),
+    @XmlEnumValue("system")
+    SYSTEM("system");
     private final String value;
 
-    PubShareInfoAction(String v) {
+    Type(String v) {
         value = v;
     }
 
@@ -39,8 +39,8 @@ public enum PubShareInfoAction {
         return value;
     }
 
-    public static PubShareInfoAction fromValue(String v) {
-        for (PubShareInfoAction c: PubShareInfoAction.values()) {
+    public static Type fromValue(String v) {
+        for (Type c: Type.values()) {
             if (c.value.equals(v)) {
                 return c;
             }

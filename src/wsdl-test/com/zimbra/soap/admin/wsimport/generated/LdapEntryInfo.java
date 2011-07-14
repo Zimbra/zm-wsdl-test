@@ -8,17 +8,17 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for customMetadata complex type.
+ * <p>Java class for ldapEntryInfo complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="customMetadata">
+ * &lt;complexType name="ldapEntryInfo">
  *   &lt;complexContent>
- *     &lt;extension base="{urn:zimbra}keyValuePairsImpl">
+ *     &lt;extension base="{urn:zimbraAdmin}adminAttrsImpl">
  *       &lt;sequence>
  *       &lt;/sequence>
- *       &lt;attribute name="section" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/extension>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -27,36 +27,36 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "customMetadata", namespace = "urn:zimbra")
-public class CustomMetadata
-    extends KeyValuePairsImpl
+@XmlType(name = "ldapEntryInfo")
+public class LdapEntryInfo
+    extends AdminAttrsImpl
 {
 
-    @XmlAttribute
-    protected String section;
+    @XmlAttribute(required = true)
+    protected String name;
 
     /**
-     * Gets the value of the section property.
+     * Gets the value of the name property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getSection() {
-        return section;
+    public String getName() {
+        return name;
     }
 
     /**
-     * Sets the value of the section property.
+     * Sets the value of the name property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setSection(String value) {
-        this.section = value;
+    public void setName(String value) {
+        this.name = value;
     }
 
 }

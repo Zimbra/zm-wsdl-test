@@ -1,5 +1,5 @@
 
-package com.zimbra.soap.account.wsimport.generated;
+package com.zimbra.soap.mail.wsimport.generated;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -8,14 +8,14 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for customMetadata complex type.
+ * <p>Java class for mailCustomMetadata complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="customMetadata">
+ * &lt;complexType name="mailCustomMetadata">
  *   &lt;complexContent>
- *     &lt;extension base="{urn:zimbra}keyValuePairsImpl">
+ *     &lt;extension base="{urn:zimbraMail}mailKeyValuePairs">
  *       &lt;sequence>
  *       &lt;/sequence>
  *       &lt;attribute name="section" type="{http://www.w3.org/2001/XMLSchema}string" />
@@ -27,9 +27,9 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "customMetadata", namespace = "urn:zimbra")
-public class CustomMetadata
-    extends KeyValuePairsImpl
+@XmlType(name = "mailCustomMetadata")
+public class MailCustomMetadata
+    extends MailKeyValuePairs
 {
 
     @XmlAttribute

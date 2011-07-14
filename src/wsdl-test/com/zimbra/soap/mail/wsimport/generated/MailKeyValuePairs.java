@@ -1,26 +1,27 @@
 
-package com.zimbra.soap.admin.wsimport.generated;
+package com.zimbra.soap.mail.wsimport.generated;
 
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for getPublishedShareInfoResponse complex type.
+ * <p>Java class for mailKeyValuePairs complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="getPublishedShareInfoResponse">
+ * &lt;complexType name="mailKeyValuePairs">
  *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *     &lt;extension base="{urn:zimbra}keyValuePairsBase">
  *       &lt;sequence>
- *         &lt;element name="share" type="{urn:zimbra}shareInfo" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="a" type="{urn:zimbra}keyValuePair" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
- *     &lt;/restriction>
+ *     &lt;/extension>
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
@@ -28,40 +29,45 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "getPublishedShareInfoResponse", propOrder = {
-    "share"
+@XmlType(name = "mailKeyValuePairs", propOrder = {
+    "a"
 })
-public class GetPublishedShareInfoResponse {
+@XmlSeeAlso({
+    MailCustomMetadata.class
+})
+public class MailKeyValuePairs
+    extends KeyValuePairsBase
+{
 
-    protected List<ShareInfo> share;
+    protected List<KeyValuePair> a;
 
     /**
-     * Gets the value of the share property.
+     * Gets the value of the a property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the share property.
+     * This is why there is not a <CODE>set</CODE> method for the a property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getShare().add(newItem);
+     *    getA().add(newItem);
      * </pre>
      * 
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link ShareInfo }
+     * {@link KeyValuePair }
      * 
      * 
      */
-    public List<ShareInfo> getShare() {
-        if (share == null) {
-            share = new ArrayList<ShareInfo>();
+    public List<KeyValuePair> getA() {
+        if (a == null) {
+            a = new ArrayList<KeyValuePair>();
         }
-        return this.share;
+        return this.a;
     }
 
 }
