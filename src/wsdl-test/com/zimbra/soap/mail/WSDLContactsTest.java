@@ -2,11 +2,11 @@
  * ***** BEGIN LICENSE BLOCK *****
  * Zimbra Collaboration Suite Server
  * Copyright (C) 2011, 2012, 2013, 2014 Zimbra, Inc.
- * 
+ *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software Foundation,
  * version 2 of the License.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
@@ -15,11 +15,6 @@
  * ***** END LICENSE BLOCK *****
  */
 package com.zimbra.soap.mail;
-
-import java.util.List;
-
-import com.sun.xml.ws.developer.WSBindingProvider;
-import com.zimbra.soap.Utility;
 
 import generated.zcsclient.mail.testContactGroupMember;
 import generated.zcsclient.mail.testContactInfo;
@@ -40,12 +35,17 @@ import generated.zcsclient.mail.testTagSpec;
 import generated.zcsclient.ws.service.ZcsPortType;
 import generated.zcsclient.zm.testContactAttr;
 
+import java.util.List;
+
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import com.sun.xml.ws.developer.WSBindingProvider;
+import com.zimbra.soap.Utility;
 
 public class WSDLContactsTest {
 
@@ -250,7 +250,7 @@ public class WSDLContactsTest {
         testContactGroupMember firstMember = modResp.getCn().getM().get(0);
         firstMember.getValue();
         Assert.assertEquals("After 1st mod first member value", qaTeam, firstMember.getValue());
- 
+
         // Modify to replace all members with one new member
         modReq = new testModifyContactRequest();
         modReq.setReplace(false);
