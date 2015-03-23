@@ -242,8 +242,7 @@ public class WSDLCalendaringTest {
                 "PUB", iComp.getClazz());
         Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @loc",
                 "Mars", iComp.getLoc());
-        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @compNum",
-                Integer.valueOf(0), iComp.getCompNum());
+        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @compNum", (Integer)0, iComp.getCompNum());
         Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @url",
                 "", iComp.getUrl());
         Assert.assertNotNull("CreateTaskResponse/echo/m/inv/comp @calItemId",
