@@ -134,15 +134,13 @@ public class WSDLCalendaringTest {
         msg.setMp(mp);
         req.setM(msg);
         req.setEcho(true);
-        Utility.addSoapAcctAuthHeaderForAcct((WSBindingProvider)mailSvcEIF,
-                testAcct);
+        Utility.addSoapAcctAuthHeaderForAcct((WSBindingProvider)mailSvcEIF, testAcct);
         testCreateAppointmentResponse resp = mailSvcEIF.createAppointmentRequest(req);
         Assert.assertNotNull("CreateAppointmentResponse object", resp);
         Assert.assertTrue("revision", resp.getRev() >= 0);
         Assert.assertTrue("ms", resp.getMs() >= 0);
         Assert.assertNotNull("CreateAppointmentResponse invId", resp.getInvId());
-        Assert.assertNotNull("CreateAppointmentResponse calItemId",
-                resp.getCalItemId());
+        Assert.assertNotNull("CreateAppointmentResponse calItemId", resp.getCalItemId());
         testCalEcho echo = resp.getEcho();
         Assert.assertNotNull("CreateAppointmentResponse echo object", echo);
     }
@@ -181,91 +179,55 @@ public class WSDLCalendaringTest {
         msg.setMp(mp);
         req.setM(msg);
         req.setEcho(true);
-        Utility.addSoapAcctAuthHeaderForAcct((WSBindingProvider)mailSvcEIF,
-                testAcct);
+        Utility.addSoapAcctAuthHeaderForAcct((WSBindingProvider)mailSvcEIF, testAcct);
         testCreateTaskResponse resp = mailSvcEIF.createTaskRequest(req);
         Assert.assertNotNull("CreateTaskResponse object", resp);
         Assert.assertTrue("revision", resp.getRev() >= 0);
         Assert.assertTrue("ms", resp.getMs() >= 0);
         Assert.assertNotNull("CreateTaskResponse invId", resp.getInvId());
-        Assert.assertNotNull("CreateTaskResponse calItemId",
-                resp.getCalItemId());
+        Assert.assertNotNull("CreateTaskResponse calItemId", resp.getCalItemId());
         testCalEcho echo = resp.getEcho();
         Assert.assertNotNull("CreateTaskResponse echo object", echo);
         testInviteAsMP inviteMp = echo.getM();
         Assert.assertNotNull("CreateTaskResponse/echo/m object", inviteMp);
-        Assert.assertNotNull("CreateTaskResponse/echo/m @id object",
-                inviteMp.getId());
-        Assert.assertNotNull("CreateTaskResponse/echo/m @f object",
-                inviteMp.getF());
-        Assert.assertNotNull("CreateTaskResponse/echo/m @rev object",
-                inviteMp.getRev());
-        Assert.assertNotNull("CreateTaskResponse/echo/m @d object",
-                inviteMp.getD());
-        Assert.assertNotNull("CreateTaskResponse/echo/m @t object",
-                inviteMp.getT());
-        Assert.assertNotNull("CreateTaskResponse/echo/m @s object",
-                inviteMp.getS());
-        Assert.assertNotNull("CreateTaskResponse/echo/m @md object",
-                inviteMp.getMd());
-        Assert.assertNotNull("CreateTaskResponse/echo/m @ms object",
-                inviteMp.getMs());
-        Assert.assertNotNull("CreateTaskResponse/echo/m @l object",
-                inviteMp.getL());
-        Assert.assertNotNull("CreateTaskResponse/echo/m/meta object",
-                inviteMp.getMeta());
+        Assert.assertNotNull("CreateTaskResponse/echo/m @id object", inviteMp.getId());
+        Assert.assertNotNull("CreateTaskResponse/echo/m @f object", inviteMp.getF());
+        Assert.assertNotNull("CreateTaskResponse/echo/m @rev object", inviteMp.getRev());
+        Assert.assertNotNull("CreateTaskResponse/echo/m @d object", inviteMp.getD());
+        Assert.assertNotNull("CreateTaskResponse/echo/m @t object", inviteMp.getT());
+        Assert.assertNotNull("CreateTaskResponse/echo/m @s object", inviteMp.getS());
+        Assert.assertNotNull("CreateTaskResponse/echo/m @md object", inviteMp.getMd());
+        Assert.assertNotNull("CreateTaskResponse/echo/m @ms object", inviteMp.getMs());
+        Assert.assertNotNull("CreateTaskResponse/echo/m @l object", inviteMp.getL());
+        Assert.assertNotNull("CreateTaskResponse/echo/m/meta object", inviteMp.getMeta());
         testMpInviteInfo info = inviteMp.getInv();
         Assert.assertNotNull("CreateTaskResponse/echo/m/inv object", info);
         Assert.assertEquals("invite type", "task", info.getType());
         List<testInviteComponent> iComps = info.getComp();
-        Assert.assertNotNull("CreateTaskResponse/echo/m/inv/comp list ",
-                iComps);
-        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp list size", 1,
-                iComps.size());
+        Assert.assertNotNull("CreateTaskResponse/echo/m/inv/comp list ", iComps);
+        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp list size", 1, iComps.size());
         testInviteComponent iComp = iComps.get(0);
-        Assert.assertNotNull("CreateTaskResponse/echo/m/inv/comp @uid",
-                iComp.getUid());
-        Assert.assertNotNull(
-                "CreateTaskResponse/echo/m/inv/comp @percentComplete",
-                iComp.getPercentComplete());
-        Assert.assertNotNull("CreateTaskResponse/echo/m/inv/comp @d",
-                iComp.getD());
-        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @status",
-                "NEED", iComp.getStatus());
-        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @noBlob",
-                true, iComp.isNoBlob());
-        Assert.assertNotNull("CreateTaskResponse/echo/m/inv/comp @ciFolder",
-                iComp.getCiFolder());
-        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @isOrg",
-                true, iComp.isIsOrg());
-        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @class",
-                "PUB", iComp.getClazz());
-        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @loc",
-                "Mars", iComp.getLoc());
-        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @compNum",
-                Integer.valueOf(0), iComp.getCompNum());
-        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @url",
-                "", iComp.getUrl());
-        Assert.assertNotNull("CreateTaskResponse/echo/m/inv/comp @calItemId",
-                iComp.getCalItemId());
-        Assert.assertNotNull("CreateTaskResponse/echo/m/inv/comp @x_uid",
-                iComp.getX_Uid());
-        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @priority",
-                "5", iComp.getPriority());
-        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @name",
-                "WSDL Task 1", iComp.getName());
-        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @rsvp",
-                false, iComp.isRsvp());
-        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @seq",
-                new Integer(0), iComp.getSeq());
-        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @method",
-                "PUBLISH", iComp.getMethod());
-        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp/fr",
-                "Body of the Task", iComp.getFr());
-        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp/desc",
-                "Body of the Task", iComp.getDesc());
-        Assert.assertNotNull("CreateTaskResponse/echo/m/inv/comp/descHtml",
-                iComp.getDescHtml());
+        Assert.assertNotNull("CreateTaskResponse/echo/m/inv/comp @uid", iComp.getUid());
+        Assert.assertNotNull( "CreateTaskResponse/echo/m/inv/comp @percentComplete", iComp.getPercentComplete());
+        Assert.assertNotNull("CreateTaskResponse/echo/m/inv/comp @d", iComp.getD());
+        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @status", "NEED", iComp.getStatus());
+        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @noBlob", true, iComp.isNoBlob());
+        Assert.assertNotNull("CreateTaskResponse/echo/m/inv/comp @ciFolder", iComp.getCiFolder());
+        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @isOrg", true, iComp.isIsOrg());
+        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @class", "PUB", iComp.getClazz());
+        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @loc", "Mars", iComp.getLoc());
+        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @compNum", Integer.valueOf(0), iComp.getCompNum());
+        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @url", "", iComp.getUrl());
+        Assert.assertNotNull("CreateTaskResponse/echo/m/inv/comp @calItemId", iComp.getCalItemId());
+        Assert.assertNotNull("CreateTaskResponse/echo/m/inv/comp @x_uid", iComp.getX_Uid());
+        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @priority", "5", iComp.getPriority());
+        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @name", "WSDL Task 1", iComp.getName());
+        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @rsvp", false, iComp.isRsvp());
+        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @seq", Integer.valueOf(0), iComp.getSeq());
+        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp @method", "PUBLISH", iComp.getMethod());
+        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp/fr", "Body of the Task", iComp.getFr());
+        Assert.assertEquals("CreateTaskResponse/echo/m/inv/comp/desc", "Body of the Task", iComp.getDesc());
+        Assert.assertNotNull("CreateTaskResponse/echo/m/inv/comp/descHtml", iComp.getDescHtml());
         testCalOrganizer echoO = iComp.getOr();
         Assert.assertNotNull("CreateTaskResponse/echo/m/inv/comp/or", echoO);
         Assert.assertNotNull("CreateTaskResponse/echo/m/inv/comp/or @url",
