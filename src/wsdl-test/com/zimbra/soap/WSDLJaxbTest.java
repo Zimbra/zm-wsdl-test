@@ -2,11 +2,11 @@
  * ***** BEGIN LICENSE BLOCK *****
  * Zimbra Collaboration Suite Server
  * Copyright (C) 2011, 2013, 2014 Zimbra, Inc.
- * 
+ *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software Foundation,
  * version 2 of the License.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
@@ -16,7 +16,12 @@
  */
 package com.zimbra.soap;
 
+import generated.zcsclient.mail.testActionSelector;
+import generated.zcsclient.mail.testConvActionRequest;
+import generated.zcsclient.mail.testConvActionSelector;
+
 import java.io.ByteArrayOutputStream;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
@@ -34,18 +39,13 @@ import javax.xml.transform.stream.StreamResult;
 import junit.framework.Assert;
 
 import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
 import org.apache.log4j.Level;
-
+import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3c.dom.Node;
 
-import generated.zcsclient.mail.testActionSelector;
-import generated.zcsclient.mail.testContactActionSelector;
-import generated.zcsclient.mail.testConvActionRequest;
-import generated.zcsclient.mail.testFolderActionSelector;
-import generated.zcsclient.mail.testNoteActionSelector;
+import com.zimbra.soap.account.message.GetInfoResponse;
 
 /**
  * Unit test for {@link GetInfoResponse} which exercises
@@ -76,51 +76,39 @@ public class WSDLJaxbTest {
      */
     @Test
     public void ConvActionRequestJaxbSubclassHandlingTest() throws Exception {
-        testFolderActionSelector fas = new testFolderActionSelector();
-        fas.setId("ids");
-        fas.setOp("op");
-        fas.setL("folder");
-        fas.setRecursive(true);
-        fas.setUrl("http://url");
+        testConvActionSelector action = new testConvActionSelector();
+        action.setId("ids");
+        action.setOp("op");
+        action.setL("folder");
+        final String ACCT_REL_PATH = "acctRELATIVE-PATH";
+        action.setAcctRelPath(ACCT_REL_PATH);
         testConvActionRequest car = new testConvActionRequest();
-        car.setAction(fas);
-
-        Class<?> ctxClasses[] = new Class<?>[] {
-            testConvActionRequest.class };
+        car.setAction(action);
+        Class<?> ctxClasses[] = new Class<?>[] { testConvActionRequest.class };
         JAXBContext jaxb = JAXBContext.newInstance(ctxClasses);
         Marshaller marshaller = jaxb.createMarshaller();
         DOMResult domRes = new DOMResult();
-        // Specifying namespace in QName seems to cause problems,
-        // however, correct namespace seems to get there, presumably
-        // from package-info
+        // Specifying namespace in QName seems to cause problems, however, correct namespace seems to get there,
+        // presumably from package-info
         JAXBElement<testConvActionRequest> jbe = new JAXBElement <testConvActionRequest>(
-                new QName("ConvActionRequest"),
-                testConvActionRequest.class, car);
+                new QName("ConvActionRequest"), testConvActionRequest.class, car);
         marshaller.marshal(jbe, domRes);
-        // marshaller.marshal(car, domRes); 
         Node docNode = domRes.getNode();
         String eXml = domToString((org.w3c.dom.Document) docNode);
-        LOG.info("ConvActionRequestJaxbSubclassHandling: marshalled XML=" +
-                eXml);
-        Assert.assertTrue("Xml should contain recursive attribute",
-                eXml.contains("recursive=\"true\""));
+        LOG.info("ConvActionRequestJaxbSubclassHandling: marshalled XML=" + eXml);
+        Assert.assertTrue("Xml should contain recursive attribute", eXml.contains("l=\"folder\""));
         Unmarshaller unmarshaller = jaxb.createUnmarshaller();
         org.w3c.dom.Document doc = toW3cDom(eXml);
         jbe = unmarshaller.unmarshal(doc, testConvActionRequest.class);
         car = jbe.getValue();
         testActionSelector as = car.getAction();
-        Assert.assertEquals("Folder attribute value",
-                    "folder", as.getL());
-        if (as instanceof testFolderActionSelector) {
-            fas = (testFolderActionSelector)as;
-            Assert.assertEquals("Url attribute value",
-                        "http://url", fas.getUrl());
-        } else if (as instanceof testNoteActionSelector) {
-            Assert.fail("got a NoteActionSelector");
-        } else if (as instanceof testContactActionSelector) {
-            Assert.fail("got a ContactActionSelector");
+        Assert.assertEquals("Folder attribute value", "folder", as.getL());
+        if (as instanceof testConvActionSelector) {
+            action = (testConvActionSelector)as;
+            Assert.assertEquals("acctRelPath value", ACCT_REL_PATH, action.getAcctRelPath());
         } else {
-            Assert.fail("Failed to get back a FolderActionSelector");
+            Assert.fail(String.format("Failed to get back correct class %s - got %s",
+                    action.getClass().getName(), as.getClass().getName()));
         }
     }
 
@@ -129,7 +117,7 @@ public class WSDLJaxbTest {
         return toW3cDom(new java.io.ByteArrayInputStream(xml.getBytes()));
     }
 
-    public static org.w3c.dom.Document toW3cDom(java.io.InputStream is) 
+    public static org.w3c.dom.Document toW3cDom(java.io.InputStream is)
         throws org.xml.sax.SAXException, java.io.IOException {
         javax.xml.parsers.DocumentBuilderFactory factory =
                 javax.xml.parsers.DocumentBuilderFactory.newInstance();
@@ -139,7 +127,7 @@ public class WSDLJaxbTest {
             builder = factory.newDocumentBuilder();
         }
         catch (javax.xml.parsers.ParserConfigurationException ex) {
-        }  
+        }
         org.w3c.dom.Document doc = builder.parse(is);
         is.close();
         return doc;
