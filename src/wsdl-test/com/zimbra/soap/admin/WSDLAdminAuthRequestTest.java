@@ -2,11 +2,11 @@
  * ***** BEGIN LICENSE BLOCK *****
  * Zimbra Collaboration Suite Server
  * Copyright (C) 2010, 2011, 2012, 2013, 2014 Zimbra, Inc.
- * 
+ *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software Foundation,
  * version 2 of the License.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
@@ -16,6 +16,14 @@
  */
 package com.zimbra.soap.admin;
 
+import generated.zcsclient.admin.testAuthRequest;
+import generated.zcsclient.admin.testAuthResponse;
+import generated.zcsclient.admin.testDelegateAuthRequest;
+import generated.zcsclient.admin.testDelegateAuthResponse;
+import generated.zcsclient.ws.service.ZcsAdminPortType;
+import generated.zcsclient.zm.testAccountBy;
+import generated.zcsclient.zm.testAccountSelector;
+
 import javax.xml.ws.soap.SOAPFaultException;
 
 import org.junit.Assert;
@@ -23,15 +31,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sun.xml.ws.developer.WSBindingProvider;
-
-import generated.zcsclient.zm.testAccountBy;
-import generated.zcsclient.zm.testAccountSelector;
-import generated.zcsclient.admin.testAuthRequest;
-import generated.zcsclient.admin.testAuthResponse;
-import generated.zcsclient.admin.testDelegateAuthRequest;
-import generated.zcsclient.admin.testDelegateAuthResponse;
-import generated.zcsclient.ws.service.ZcsAdminPortType;
-
 import com.zimbra.soap.Utility;
 
 public class WSDLAdminAuthRequestTest {
@@ -78,9 +77,10 @@ public class WSDLAdminAuthRequestTest {
             testAuthResponse authResponse = eif.authRequest(authReq);
             Assert.fail("Should have had a fault resulting in an exception being thrown");
         } catch (SOAPFaultException sfe) {
+            String errSubstr = "authentication failed for [admin]";
             Assert.assertTrue(
-                    sfe.getMessage() + "should start with <authentication failed for >",
-                    sfe.getMessage().startsWith("authentication failed for "));
+                    String.format("%s should contain '%s'", sfe.getMessage(), errSubstr),
+                    sfe.getMessage().indexOf(errSubstr) >= 0);
         }
     }
 
@@ -99,9 +99,10 @@ public class WSDLAdminAuthRequestTest {
             testAuthResponse authResponse = eif.authRequest(authReq);
             Assert.fail("Should have had a fault resulting in an exception being thrown");
         } catch (SOAPFaultException sfe) {
-            Assert.assertEquals("SOAP fault message - ",
-                    "permission denied: not an admin account",
-                    sfe.getMessage());
+            String errSubstr = "permission denied: not an admin account";
+            Assert.assertTrue(
+                    String.format("%s should contain '%s'", sfe.getMessage(), errSubstr),
+                    sfe.getMessage().indexOf(errSubstr) >= 0);
         }
     }
 
