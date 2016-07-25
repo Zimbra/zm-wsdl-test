@@ -45,14 +45,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3c.dom.Node;
 
-import com.zimbra.soap.account.message.GetInfoResponse;
 
-/**
- * Unit test for {@link GetInfoResponse} which exercises
- * translation to and from Element
- *
- * @author Gren Elliot
- */
 public class WSDLJaxbTest {
     private static final Logger LOG = Logger.getLogger(WSDLJaxbTest.class);
 
@@ -64,10 +57,6 @@ public class WSDLJaxbTest {
 
     @BeforeClass
     public static void init() throws Exception {
-        // JAXBContext jaxb = JAXBContext.newInstance(GetInfoResponse.class);
-        // unmarshaller = jaxb.createUnmarshaller();
-        // getInfoResp = (GetInfoResponse) unmarshaller.unmarshal(
-        //     JaxbToElementTest.class.getResourceAsStream("GetInfoResponse.xml"));
     }
 
     /**
