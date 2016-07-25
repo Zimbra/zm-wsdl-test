@@ -2,11 +2,11 @@
  * ***** BEGIN LICENSE BLOCK *****
  * Zimbra Collaboration Suite Server
  * Copyright (C) 2012, 2013, 2014 Zimbra, Inc.
- * 
+ *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software Foundation,
  * version 2 of the License.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
@@ -16,15 +16,20 @@
  */
 package com.zimbra.soap.mail;
 
-import java.util.List;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import com.sun.xml.ws.developer.WSBindingProvider;
 import com.zimbra.soap.Utility;
 
 import generated.zcsclient.mail.testActionGrantSelector;
-import generated.zcsclient.mail.testCalEcho;
-import generated.zcsclient.mail.testCalOrganizer;
-import generated.zcsclient.mail.testCalendarAttendee;
 import generated.zcsclient.mail.testCreateMountpointRequest;
 import generated.zcsclient.mail.testCreateMountpointResponse;
 import generated.zcsclient.mail.testFolderActionRequest;
@@ -32,27 +37,8 @@ import generated.zcsclient.mail.testFolderActionResponse;
 import generated.zcsclient.mail.testFolderActionResult;
 import generated.zcsclient.mail.testFolderActionSelector;
 import generated.zcsclient.mail.testMountpoint;
-import generated.zcsclient.mail.testMsg;
-import generated.zcsclient.mail.testCreateAppointmentRequest;
-import generated.zcsclient.mail.testCreateAppointmentResponse;
-import generated.zcsclient.mail.testCreateTaskRequest;
-import generated.zcsclient.mail.testCreateTaskResponse;
-import generated.zcsclient.mail.testDtTimeInfo;
-import generated.zcsclient.mail.testEmailAddrInfo;
-import generated.zcsclient.mail.testInvitationInfo;
-import generated.zcsclient.mail.testInviteAsMP;
-import generated.zcsclient.mail.testInviteComponent;
-import generated.zcsclient.mail.testMimePartInfo;
-import generated.zcsclient.mail.testMpInviteInfo;
 import generated.zcsclient.mail.testNewMountpointSpec;
 import generated.zcsclient.ws.service.ZcsPortType;
-
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 public class WSDLSharingTest {
 
@@ -61,6 +47,13 @@ public class WSDLSharingTest {
     private final static String testAcctDomain = "wsdl.sharing.example.test";
     private final static String testAcct = "owner@" + testAcctDomain;
     private final static String testAcct2 = "accessor@" + testAcctDomain;
+
+    private static final Logger LOG = Logger.getLogger(WSDLSharingTest.class);
+    static {
+        BasicConfigurator.configure();
+        Logger.getRootLogger().setLevel(Level.INFO);
+        LOG.setLevel(Level.INFO);
+    }
 
     @BeforeClass
     public static void init() throws Exception {
@@ -77,7 +70,7 @@ public class WSDLSharingTest {
             Utility.deleteAccountIfExists(testAcct2);
             Utility.deleteDomainIfExists(testAcctDomain);
         } catch (Exception ex) {
-            System.err.println("Exception " + ex.toString() + " thrown inside oneTimeTearDown");
+            LOG.debug("Exception thrown inside oneTimeTearDown", ex);
         }
     }
 
