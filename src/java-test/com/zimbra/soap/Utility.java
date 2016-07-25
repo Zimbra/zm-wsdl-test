@@ -2,11 +2,11 @@
  * ***** BEGIN LICENSE BLOCK *****
  * Zimbra Collaboration Suite Server
  * Copyright (C) 2010, 2011, 2012, 2013, 2014 Zimbra, Inc.
- * 
+ *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software Foundation,
  * version 2 of the License.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
@@ -15,6 +15,31 @@
  * ***** END LICENSE BLOCK *****
  */
 package com.zimbra.soap;
+
+import java.io.File;
+import java.util.Map;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.ws.soap.SOAPFaultException;
+
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.junit.Assert;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import com.google.common.collect.Maps;
+import com.sun.xml.bind.api.JAXBRIContext;
+import com.sun.xml.ws.api.message.Header;
+import com.sun.xml.ws.api.message.Headers;
+import com.sun.xml.ws.developer.SchemaValidationFeature;
+import com.sun.xml.ws.developer.WSBindingProvider;
 
 import generated.zcsclient.account.testAuthRequest;
 import generated.zcsclient.account.testAuthResponse;
@@ -89,28 +114,6 @@ import generated.zcsclient.zm.testAccountSelector;
 import generated.zcsclient.zm.testAuthTokenControl;
 import generated.zcsclient.zm.testHeaderContext;
 
-import java.io.File;
-import java.util.Map;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.ws.soap.SOAPFaultException;
-
-import org.junit.Assert;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import com.google.common.collect.Maps;
-import com.sun.xml.bind.api.JAXBRIContext;
-import com.sun.xml.ws.api.message.Header;
-import com.sun.xml.ws.api.message.Headers;
-import com.sun.xml.ws.developer.SchemaValidationFeature;
-import com.sun.xml.ws.developer.WSBindingProvider;
-
 /**
  * Current assumption : user1 exists with password test123
  */
@@ -122,6 +125,14 @@ public class Utility {
     private static ZcsAdminPortType nvAdminSvcEIF = null;
     private static String adminAuthToken = null;
     private static Map<String,String> acctAuthToks = Maps.newHashMap();
+
+    private static final Logger LOG = Logger.getLogger(Utility.class);
+    static {
+        BasicConfigurator.configure();
+        Logger.getRootLogger().setLevel(Level.INFO);
+        LOG.setLevel(Level.INFO);
+    }
+
 
     public static void addSoapAuthHeader(WSBindingProvider bp, String authToken)
     throws JAXBException, ParserConfigurationException {
@@ -296,7 +307,17 @@ public class Utility {
             javax.net.ssl.SSLContext sc = javax.net.ssl.SSLContext.getInstance("SSL");
             sc.init(null, trustAllCerts, new java.security.SecureRandom());
             javax.net.ssl.HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-        } catch (Exception e) { }
+        } catch (Exception e) {
+            LOG.debug("Problem installing the all-trusting trust manager", e);
+        }
+
+        javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(new javax.net.ssl.HostnameVerifier() {
+
+            @Override
+            public boolean verify(String hostname, javax.net.ssl.SSLSession sslSession) {
+                return true;
+            }
+        });
     }
 
     public static void deleteDomainIfExists(String domainName) throws Exception {
@@ -318,9 +339,10 @@ public class Utility {
             }
         } catch (SOAPFaultException sfe) {
             String missive = sfe.getMessage();
-            if (!missive.startsWith("no such domain:"))
-                System.err.println("Exception " + sfe.toString() +
-                        " thrown attempting to delete domain " + domainName);
+            if (!missive.startsWith("no such domain:")) {
+                LOG.debug(String.format(
+                        "Exception %s thrown attempting to delete domain %s", sfe.toString(), domainName));
+            }
         }
     }
 
@@ -343,9 +365,10 @@ public class Utility {
             }
         } catch (SOAPFaultException sfe) {
             String missive = sfe.getMessage();
-            if (!missive.startsWith("no such server:"))
-                System.err.println("Exception " + sfe.toString() +
-                        " thrown attempting to delete domain " + serverName);
+            if (!missive.startsWith("no such server:")) {
+                LOG.debug(String.format(
+                        "Exception %s thrown attempting to delete server %s", sfe.toString(), serverName));
+            }
         }
     }
 
@@ -371,9 +394,10 @@ public class Utility {
             Assert.assertNotNull(delResp);
         } catch (SOAPFaultException sfe) {
             String missive = sfe.getMessage();
-            if (!missive.startsWith("no such account:"))
-                System.err.println("Exception " + sfe.toString() +
-                        " thrown attempting to delete account " + accountName);
+            if (!missive.startsWith("no such account:")) {
+                LOG.debug(String.format(
+                        "Exception %s thrown attempting to delete account %s", sfe.toString(), accountName));
+            }
         }
     }
 
@@ -402,10 +426,10 @@ public class Utility {
             Assert.assertNotNull(delResp);
         } catch (SOAPFaultException sfe) {
             String missive = sfe.getMessage();
-            if (!missive.startsWith("no such calendar resource:"))
-                System.err.println("Exception " + sfe.toString() +
-                        " thrown attempting to delete CalendarResource "
-                        + calResourceName);
+            if (!missive.startsWith("no such calendar resource:")) {
+                LOG.debug(String.format("Exception %s thrown attempting to delete calendar resource %s",
+                        sfe.toString(), calResourceName));
+            }
         }
     }
 
@@ -428,9 +452,10 @@ public class Utility {
             Assert.assertNotNull(delResp);
         } catch (SOAPFaultException sfe) {
             String missive = sfe.getMessage();
-            if (!missive.startsWith("no such cos:"))
-                System.err.println("Exception " + sfe.toString() +
-                        " thrown attempting to delete cos " + cosName);
+            if (!missive.startsWith("no such cos:")) {
+                LOG.debug(String.format("Exception %s thrown attempting to delete COS %s",
+                        sfe.toString(), cosName));
+            }
         }
     }
 
@@ -449,9 +474,8 @@ public class Utility {
                     if (volRootpath != null && (volRootpath.length() > 0))
                         new File(volume.getRootpath()).deleteOnExit();
                 } catch (Exception ex) {
-                    System.err.println("Exception " + ex.toString() +
-                    " thrown inside deleteVolumeIfExists - deleting rootPath="
-                            + volRootpath + " for volume=" + name);
+                    LOG.debug(String.format(
+                            "Exception %s thrown deleting rootPath=%s for volume=%s", ex.toString(), volRootpath,name));
                 return;
                 }
             }
@@ -474,9 +498,10 @@ public class Utility {
                     getAdminSvcEIF().deleteDistributionListRequest(delReq));
         } catch (SOAPFaultException sfe) {
             String missive = sfe.getMessage();
-            if (!missive.startsWith("no such distribution list:"))
-                System.err.println("Exception " + sfe.toString() +
-                        " thrown attempting to delete dl " + name);
+            if (!missive.startsWith("no such distribution list:")) {
+                LOG.debug(String.format("Exception %s thrown attempting to delete distribution list %s",
+                        sfe.toString(), name));
+            }
         }
     }
 
