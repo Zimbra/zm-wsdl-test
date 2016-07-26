@@ -17,7 +17,10 @@
 package com.zimbra.soap;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -119,20 +122,40 @@ import generated.zcsclient.zm.testHeaderContext;
  */
 public class Utility {
     private static final String DEFAULT_PASS = "test123";
+    private static final String PROP_ADMIN_NAME = "adminName";
+    private static final String PROP_ADMIN_PASS = "adminPass";
+    private static final String PROP_OTHER_USERS_PASS = "otherUsersPass";
     private static ZcsPortType zcsSvcEIF = null;
     private static ZcsPortType nvZcsSvcEIF = null;
     private static ZcsAdminPortType adminSvcEIF = null;
     private static ZcsAdminPortType nvAdminSvcEIF = null;
     private static String adminAuthToken = null;
     private static Map<String,String> acctAuthToks = Maps.newHashMap();
+    private static Properties properties = null;
 
     private static final Logger LOG = Logger.getLogger(Utility.class);
     static {
         BasicConfigurator.configure();
         Logger.getRootLogger().setLevel(Level.INFO);
         LOG.setLevel(Level.INFO);
+        properties = new Properties();
+        try (InputStream propStream = Utility.class.getResourceAsStream("/test.properties")) {
+            if (propStream != null) {
+                properties.load(propStream);
+            }
+        } catch (IOException e) {
+            LOG.info("Problem loading properties from test.properties", e);
+        }
+        if (!properties.containsKey(PROP_ADMIN_NAME)) {
+            properties.setProperty(PROP_ADMIN_NAME, "admin");
+        }
+        if (!properties.containsKey(PROP_ADMIN_PASS)) {
+            properties.setProperty(PROP_ADMIN_PASS, DEFAULT_PASS);
+        }
+        if (!properties.containsKey(PROP_OTHER_USERS_PASS)) {
+            properties.setProperty(PROP_OTHER_USERS_PASS, DEFAULT_PASS);
+        }
     }
-
 
     public static void addSoapAuthHeader(WSBindingProvider bp, String authToken)
     throws JAXBException, ParserConfigurationException {
@@ -179,7 +202,7 @@ public class Utility {
         if (acctAuthToks.containsKey(acctName))
             authTok = acctAuthToks.get(acctName);
         else {
-            authTok = Utility.getAccountServiceAuthToken(acctName, DEFAULT_PASS);
+            authTok = getAccountServiceAuthToken(acctName, properties.getProperty(PROP_OTHER_USERS_PASS));
             acctAuthToks.put(acctName, authTok);
         }
         addSoapAcctAuthHeader(bp, authTok);
@@ -196,7 +219,7 @@ public class Utility {
         String acctName = "user1";
         if (acctAuthToks.containsKey(acctName))
             return acctAuthToks.get(acctName);
-        return getAccountServiceAuthToken(acctName, DEFAULT_PASS);
+        return getAccountServiceAuthToken(acctName, properties.getProperty(PROP_OTHER_USERS_PASS));
     }
 
     public static String getAccountServiceAuthToken(String acctName, String password)
@@ -275,9 +298,9 @@ public class Utility {
             generated.zcsclient.admin.testAuthRequest authReq = new generated.zcsclient.admin.testAuthRequest();
             generated.zcsclient.zm.testAccountSelector acct = new generated.zcsclient.zm.testAccountSelector();
             acct.setBy(generated.zcsclient.zm.testAccountBy.NAME);
-            acct.setValue("admin");
+            acct.setValue(properties.getProperty(PROP_ADMIN_NAME));
             authReq.setAccount(acct);
-            authReq.setPassword(DEFAULT_PASS);
+            authReq.setPassword(properties.getProperty(PROP_ADMIN_PASS));
             authReq.setAuthToken(null);
             generated.zcsclient.admin.testAuthResponse authResponse = getAdminSvcEIF().authRequest(authReq);
             Assert.assertNotNull(authResponse);
@@ -577,7 +600,7 @@ public class Utility {
         } catch (SOAPFaultException sfe) {
             testCreateAccountRequest createAcctReq = new testCreateAccountRequest();
             createAcctReq.setName(accountName);
-            createAcctReq.setPassword(DEFAULT_PASS);
+            createAcctReq.setPassword(properties.getProperty(PROP_OTHER_USERS_PASS));
             Utility.addSoapAdminAuthHeader((WSBindingProvider)adminSvcEIF);
             testCreateAccountResponse resp =
                     adminSvcEIF.createAccountRequest(createAcctReq);
@@ -605,7 +628,7 @@ public class Utility {
         } catch (SOAPFaultException sfe) {
             testCreateCalendarResourceRequest createAcctReq = new testCreateCalendarResourceRequest();
             createAcctReq.setName(calResourceName);
-            createAcctReq.setPassword(DEFAULT_PASS);
+            createAcctReq.setPassword(properties.getProperty(PROP_OTHER_USERS_PASS));
             createAcctReq.getA().add(Utility.mkAttr("displayName", displayName));
             createAcctReq.getA().add(Utility.mkAttr("zimbraCalResType", "Location"));
             createAcctReq.getA().add(Utility.mkAttr("zimbraCalResLocationDisplayName", "Harare"));
@@ -633,7 +656,6 @@ public class Utility {
         Utility.addSoapAdminAuthHeader((WSBindingProvider)adminSvcEIF);
         testGetMailboxResponse gmResp = adminSvcEIF.getMailboxRequest(gmReq);
         Assert.assertNotNull(gmResp);
-        // getAccountServiceAuthToken(accountName, DEFAULT_PASS);
         return accountId;
     }
 
