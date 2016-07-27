@@ -3,6 +3,7 @@
   xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
   <info organisation="com.zimbra" module="zm-wsdl-test-cfx" status="release"/>
   <dependencies>
+    <dependency org="com.google.guava" name="guava" rev="13.0.1"/>
     <dependency org="org.apache.cxf" name="cxf-tools-wsdlto-core" rev="3.1.6"/>
     <dependency org="org.apache.cxf" name="cxf-tools-common" rev="3.1.6"/>
     <dependency org="org.apache.cxf" name="cxf-core" rev="3.1.6"/>
@@ -20,9 +21,16 @@
     <dependency org="wsdl4j" name="wsdl4j" rev="1.6.3"/>
     <dependency org="com.sun.xml.bind" name="jaxb-xjc" rev="2.2.11"/>
     <dependency org="com.sun.xml.bind" name="jaxb-core" rev="2.2.11"/>
+    <dependency org="com.sun.xml.bind" name="jaxb-impl" rev="2.2.11"/>
+    <dependency org="com.sun.xml.stream.buffer" name="streambuffer" rev="1.5.1"/>
     <dependency org="org.apache.ws.xmlschema" name="xmlschema-core" rev="2.2.1"/>
     <dependency org="org.apache.neethi" name="neethi" rev="3.0.3"/>
+    <dependency org="com.sun.xml.ws" name="jaxws-rt" rev="2.2.6"/>
+    <dependency org="com.sun.xml.ws" name="policy" rev="2.3.1"/>
+    <dependency org="org.jvnet.staxex" name="stax-ex" rev="1.7.1"/>
+    <dependency org="org.glassfish.gmbal" name="gmbal" rev="4.0.0-b001"/>
     <dependency org="xml-resolver" name="xml-resolver" rev="1.2"/>
     <dependency org="log4j" name="log4j" rev="1.2.17"/>
+    <dependency org="junit" name="junit" rev="4.8.2"/>
   </dependencies>
 </ivy-module>
