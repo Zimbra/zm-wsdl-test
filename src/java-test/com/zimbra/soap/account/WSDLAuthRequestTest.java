@@ -2,11 +2,11 @@
  * ***** BEGIN LICENSE BLOCK *****
  * Zimbra Collaboration Suite Server
  * Copyright (C) 2010, 2011, 2012, 2013, 2014 Zimbra, Inc.
- * 
+ *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software Foundation,
  * version 2 of the License.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
@@ -16,12 +16,6 @@
  */
 package com.zimbra.soap.account;
 
-import generated.zcsclient.account.testAuthRequest;
-import generated.zcsclient.account.testAuthResponse;
-import generated.zcsclient.ws.service.ZcsPortType;
-import generated.zcsclient.zm.testAccountBy;
-import generated.zcsclient.zm.testAccountSelector;
-
 import javax.xml.ws.soap.SOAPFaultException;
 
 import org.junit.Assert;
@@ -29,6 +23,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.zimbra.soap.Utility;
+
+import generated.zcsclient.account.testAuthRequest;
+import generated.zcsclient.account.testAuthResponse;
+import generated.zcsclient.ws.service.ZcsPortType;
+import generated.zcsclient.zm.testAccountBy;
+import generated.zcsclient.zm.testAccountSelector;
 
 public class WSDLAuthRequestTest {
 
@@ -40,7 +40,7 @@ public class WSDLAuthRequestTest {
     }
 
     /**
-     * Current assumption : user1 exists with password test123
+     * Current assumption : user1 exists and has password configured with key otherUsersPass in test.properties
      */
     @Test
     public void simple() throws Exception {
@@ -49,7 +49,7 @@ public class WSDLAuthRequestTest {
         acct.setBy(testAccountBy.NAME);
         acct.setValue("user1");
         authReq.setAccount(acct);
-        authReq.setPassword("test123");
+        authReq.setPassword(Utility.getOtherUsersPassword());
         authReq.setPreauth(null);
         authReq.setAuthToken(null);
         testAuthResponse authResponse = eif.authRequest(authReq);
@@ -65,7 +65,7 @@ public class WSDLAuthRequestTest {
     }
 
     /**
-     * Current assumption : user1 exists with password test123
+     * Current assumption : user1 exists and has password configured with key otherUsersPass in test.properties
      */
     @Test
     public void badPasswd() throws Exception {
@@ -73,7 +73,7 @@ public class WSDLAuthRequestTest {
             Utility.getAccountServiceAuthToken("user1", "BAD-PASSWORD");
             Assert.fail("Should have had a fault resulting in an exception being thrown");
         } catch (SOAPFaultException sfe) {
-            Assert.assertTrue(sfe.getMessage().startsWith("authentication failed for "));
+            Assert.assertTrue(sfe.getMessage().contains("authentication failed for "));
         }
     }
 }
