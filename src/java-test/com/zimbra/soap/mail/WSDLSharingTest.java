@@ -48,13 +48,6 @@ public class WSDLSharingTest {
     private final static String testAcct = "owner@" + testAcctDomain;
     private final static String testAcct2 = "accessor@" + testAcctDomain;
 
-    private static final Logger LOG = Logger.getLogger(WSDLSharingTest.class);
-    static {
-        BasicConfigurator.configure();
-        Logger.getRootLogger().setLevel(Level.INFO);
-        LOG.setLevel(Level.INFO);
-    }
-
     @BeforeClass
     public static void init() throws Exception {
         Utility.setUpToAcceptAllHttpsServerCerts();
@@ -70,7 +63,7 @@ public class WSDLSharingTest {
             Utility.deleteAccountIfExists(testAcct2);
             Utility.deleteDomainIfExists(testAcctDomain);
         } catch (Exception ex) {
-            LOG.debug("Exception thrown inside oneTimeTearDown", ex);
+            Utility.LOG.debug("Exception thrown inside oneTimeTearDown", ex);
         }
     }
 
