@@ -2,11 +2,11 @@
  * ***** BEGIN LICENSE BLOCK *****
  * Zimbra Collaboration Suite Server
  * Copyright (C) 2011, 2012, 2013, 2014 Zimbra, Inc.
- * 
+ *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software Foundation,
  * version 2 of the License.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
@@ -18,25 +18,89 @@ package com.zimbra.soap.admin;
 
 import java.util.List;
 
-import com.sun.xml.ws.developer.WSBindingProvider;
-
-import generated.zcsclient.admin.*;
-import generated.zcsclient.ws.service.ZcsAdminPortType;
-import generated.zcsclient.zm.*;
-
-import com.zimbra.soap.Utility;
-
-import org.junit.Assert;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.sun.xml.ws.developer.WSBindingProvider;
+import com.zimbra.soap.Utility;
+
+import generated.zcsclient.admin.testAccountInfo;
+import generated.zcsclient.admin.testAccountLoggerInfo;
+import generated.zcsclient.admin.testAccountQuotaInfo;
+import generated.zcsclient.admin.testAddAccountAliasRequest;
+import generated.zcsclient.admin.testAddAccountAliasResponse;
+import generated.zcsclient.admin.testAddAccountLoggerRequest;
+import generated.zcsclient.admin.testAddAccountLoggerResponse;
+import generated.zcsclient.admin.testAttr;
+import generated.zcsclient.admin.testCosCountInfo;
+import generated.zcsclient.admin.testCosInfo;
+import generated.zcsclient.admin.testCountAccountRequest;
+import generated.zcsclient.admin.testCountAccountResponse;
+import generated.zcsclient.admin.testCreateAccountRequest;
+import generated.zcsclient.admin.testCreateAccountResponse;
+import generated.zcsclient.admin.testDeleteAccountRequest;
+import generated.zcsclient.admin.testDeleteAccountResponse;
+import generated.zcsclient.admin.testDeleteMailboxRequest;
+import generated.zcsclient.admin.testDeleteMailboxResponse;
+import generated.zcsclient.admin.testDomainBy;
+import generated.zcsclient.admin.testDomainSelector;
+import generated.zcsclient.admin.testGetAccountInfoRequest;
+import generated.zcsclient.admin.testGetAccountInfoResponse;
+import generated.zcsclient.admin.testGetAccountLoggersRequest;
+import generated.zcsclient.admin.testGetAccountLoggersResponse;
+import generated.zcsclient.admin.testGetAccountMembershipRequest;
+import generated.zcsclient.admin.testGetAccountMembershipResponse;
+import generated.zcsclient.admin.testGetAccountRequest;
+import generated.zcsclient.admin.testGetAccountResponse;
+import generated.zcsclient.admin.testGetAllAccountLoggersRequest;
+import generated.zcsclient.admin.testGetAllAccountLoggersResponse;
+import generated.zcsclient.admin.testGetAllAccountsRequest;
+import generated.zcsclient.admin.testGetAllAccountsResponse;
+import generated.zcsclient.admin.testGetAllAdminAccountsRequest;
+import generated.zcsclient.admin.testGetAllAdminAccountsResponse;
+import generated.zcsclient.admin.testGetAllMailboxesRequest;
+import generated.zcsclient.admin.testGetAllMailboxesResponse;
+import generated.zcsclient.admin.testGetMailboxRequest;
+import generated.zcsclient.admin.testGetMailboxResponse;
+import generated.zcsclient.admin.testGetQuotaUsageRequest;
+import generated.zcsclient.admin.testGetQuotaUsageResponse;
+import generated.zcsclient.admin.testLoggerInfo;
+import generated.zcsclient.admin.testMailboxByAccountIdSelector;
+import generated.zcsclient.admin.testMailboxInfo;
+import generated.zcsclient.admin.testMailboxQuotaInfo;
+import generated.zcsclient.admin.testMailboxWithMailboxId;
+import generated.zcsclient.admin.testModifyAccountRequest;
+import generated.zcsclient.admin.testModifyAccountResponse;
+import generated.zcsclient.admin.testPurgeMessagesRequest;
+import generated.zcsclient.admin.testPurgeMessagesResponse;
+import generated.zcsclient.admin.testReIndexRequest;
+import generated.zcsclient.admin.testReIndexResponse;
+import generated.zcsclient.admin.testRecalculateMailboxCountsRequest;
+import generated.zcsclient.admin.testRecalculateMailboxCountsResponse;
+import generated.zcsclient.admin.testReindexMailboxInfo;
+import generated.zcsclient.admin.testReindexProgressInfo;
+import generated.zcsclient.admin.testRemoveAccountAliasRequest;
+import generated.zcsclient.admin.testRemoveAccountAliasResponse;
+import generated.zcsclient.admin.testRemoveAccountLoggerRequest;
+import generated.zcsclient.admin.testRemoveAccountLoggerResponse;
+import generated.zcsclient.admin.testRenameAccountRequest;
+import generated.zcsclient.admin.testRenameAccountResponse;
+import generated.zcsclient.admin.testVerifyIndexRequest;
+import generated.zcsclient.admin.testVerifyIndexResponse;
+import generated.zcsclient.ws.service.ZcsAdminPortType;
+import generated.zcsclient.zm.testAccountBy;
+import generated.zcsclient.zm.testAccountSelector;
+import generated.zcsclient.zm.testLoggingLevel;
+
 public class WSDLAcctAdminTest {
 
     private final static String testAcctDomain = "wsdl.acct.domain.example.test";
-    private final static String testAcct = "wsdl1@" + testAcctDomain;
+    private final static String testAcctName = "wsdl1";
+    private final static String testAcct = testAcctName + "@" + testAcctDomain;
     private final static String testCos = "wsdl.cos.example.test";
     private static ZcsAdminPortType eif = null;
 
@@ -56,7 +120,7 @@ public class WSDLAcctAdminTest {
             Utility.deleteDomainIfExists(testAcctDomain);
             Utility.deleteCosIfExists(testCos);
         } catch (Exception ex) {
-            System.err.println("Exception " + ex.toString() + 
+            System.err.println("Exception " + ex.toString() +
             " thrown inside oneTimeTearDown");
         }
     }
@@ -88,10 +152,21 @@ public class WSDLAcctAdminTest {
 
     @Test
     public void foreignPrincGetAccountTest() throws Exception {
+        Utility.deleteAccountIfExists(testAcct);
+        String testAccountId = Utility.ensureAccountExists(testAcct);
+        testModifyAccountRequest modReq = new testModifyAccountRequest();
+        modReq.setId(testAccountId);
+        testAttr modAttr = new testAttr();
+        modAttr.setN("zimbraForeignPrincipal");
+        modAttr.setValue(testAcctName + "@ZIMBRA.COM");
+        modReq.getA().add(modAttr);
+        testModifyAccountResponse modResp = eif.modifyAccountRequest(modReq);
+        Assert.assertNotNull("ModifyAccountResponse object", modResp);
+
         testGetAccountRequest req = new testGetAccountRequest();
         testAccountSelector acct = new testAccountSelector();
         acct.setBy(testAccountBy.NAME);
-        acct.setValue("user1");
+        acct.setValue(testAcct);
         req.setAccount(acct);
         req.setAttrs("zimbraForeignPrincipal");
         Utility.addSoapAdminAuthHeader((WSBindingProvider)eif);
@@ -99,17 +174,15 @@ public class WSDLAcctAdminTest {
         Assert.assertNotNull("GetAccountResponse object", resp);
         testAccountInfo acctInfo = resp.getAccount();
         Assert.assertNotNull("AccountInfo object", acctInfo);
-        Assert.assertTrue("value of <account> 'name' attribute should start with 'user1@'",
-                acctInfo.getName().startsWith("user1@"));
+        Assert.assertTrue(String.format("value of <account> 'name' attribute should start with '%s'", testAcctName),
+                acctInfo.getName().startsWith(testAcctName));
         int len = acctInfo.getId().length();
-        Assert.assertTrue("length of <account> 'id' attribute length is " + len +
-                " - should be longer than 10", len > 10);
+        Assert.assertTrue(String.format(
+                "length of <account> 'id' attribute length is %s - should be longer than 10", len), len > 10);
         List <testAttr> attrs = acctInfo.getA();
         len = attrs.size();
-        Assert.assertTrue("<account> has " + len +
-                " <a> children - should have only 1", len == 1);
-        Assert.assertEquals("'n' attribute of <a> -", "zimbraForeignPrincipal",
-                attrs.get(0).getN());
+        Assert.assertTrue(String.format("<account> has %s <a> children - should have only 1", len), len == 1);
+        Assert.assertEquals("'n' attribute of <a> -", "zimbraForeignPrincipal", attrs.get(0).getN());
     }
 
     @Test
@@ -119,7 +192,7 @@ public class WSDLAcctAdminTest {
         Utility.ensureDomainExists(testAcctDomain);
         testCreateAccountRequest createAcctReq = new testCreateAccountRequest();
         createAcctReq.setName(testAcct);
-        createAcctReq.setPassword("test123");
+        createAcctReq.setPassword(Utility.getOtherUsersPassword());
         Utility.addSoapAdminAuthHeader((WSBindingProvider)eif);
         testCreateAccountResponse resp = eif.createAccountRequest(createAcctReq);
         Assert.assertNotNull("CreateAccountResponse object", resp);
@@ -155,23 +228,18 @@ public class WSDLAcctAdminTest {
         Assert.assertEquals("<name> child of GetAccountInfoResponse", testAcct, acctName);
         List<testAttr> attrs = getInfoResp.getA();
         len = attrs.size();
-        Assert.assertTrue("number of <a> children of GetAccountInfoResponse should be at least 2",
-                len >= 2);
-        Assert.assertEquals("<cos> child of GetAccountInfoResponse 'name' attribute",
-                "default", cos.getName());
+        Assert.assertTrue("number of <a> children of GetAccountInfoResponse should be at least 2", len >= 2);
+        Assert.assertEquals("<cos> child of GetAccountInfoResponse 'name' attribute", "default", cos.getName());
         len = soapURL.size();
         Assert.assertEquals("number of <soapURL> children of GetAccountInfoResponse", 1, len);
-        Assert.assertTrue(
-                "value of <soapURL> child of GetAccountInfoResponse should start with 'http://'",
-                soapURL.get(0).startsWith("http://"));
-        Assert.assertTrue(
-                "value of <adminSoapURL> child of GetAccountInfoResponse should start with 'https://'",
+        Assert.assertTrue(String.format(
+                "value [%s] of <soapURL> child of GetAccountInfoResponse should start with 'http'", soapURL),
+                soapURL.get(0).startsWith("http"));
+        Assert.assertTrue("value of <adminSoapURL> child of GetAccountInfoResponse should start with 'https://'",
                 adminSoapURL.startsWith("https://"));
-        Assert.assertTrue(
-                "value of <publicMailURL> child of GetAccountInfoResponse should start with 'http://'",
-                publicMailURL.startsWith("http://"));
+        Assert.assertTrue("value of <publicMailURL> child of GetAccountInfoResponse should start with 'http'",
+                publicMailURL.startsWith("http"));
     }
-
 
     @Test
     public void getAccountByNameTest() throws Exception {
@@ -232,7 +300,7 @@ public class WSDLAcctAdminTest {
         Assert.assertNotNull("ModifyAccountResponse object", modResp);
         testAccountInfo accountInfo = modResp.getAccount();
         Assert.assertNotNull("AccountInfo object", accountInfo);
-        Assert.assertEquals("modifyAccountResponse <account> 'name' attribute", 
+        Assert.assertEquals("modifyAccountResponse <account> 'name' attribute",
                 testAcct, accountInfo.getName());
         respId = accountInfo.getId();
         Assert.assertEquals("modifyAccountResponse <account> 'id' attribute",
@@ -355,7 +423,7 @@ public class WSDLAcctAdminTest {
         Assert.assertNotNull("ModifyAccountResponse object", modResp);
         testAccountInfo accountInfo = modResp.getAccount();
         Assert.assertNotNull("AccountInfo object", accountInfo);
-        Assert.assertEquals("modifyAccountResponse <account> 'name' attribute", 
+        Assert.assertEquals("modifyAccountResponse <account> 'name' attribute",
                 testAcct, accountInfo.getName());
         String respId = accountInfo.getId();
         Assert.assertEquals("modifyAccountResponse <account> 'id' attribute",
@@ -546,7 +614,7 @@ public class WSDLAcctAdminTest {
         removeAcctLogger(testAccountId, null);
         // Adding an AccountLogger with a null account is disallowed,
         // so, how would such a logger get created?  No exception thrown
-        // for this though and ok response received... 
+        // for this though and ok response received...
         removeAcctLogger(null, "zimbra.tnef");
     }
 
