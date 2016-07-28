@@ -19,6 +19,9 @@ package com.zimbra.soap;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Map;
 import java.util.Properties;
 
@@ -33,7 +36,9 @@ import javax.xml.ws.soap.SOAPFaultException;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -133,11 +138,17 @@ public class Utility {
     private static Map<String,String> acctAuthToks = Maps.newHashMap();
     private static Properties properties = null;
 
-    private static final Logger LOG = Logger.getLogger(Utility.class);
+    public static final Logger LOG = Logger.getLogger("zimbra.test");
+
     static {
-        BasicConfigurator.configure();
-        Logger.getRootLogger().setLevel(Level.INFO);
-        LOG.setLevel(Level.INFO);
+        try (final InputStream stream = Utility.class.getResourceAsStream("/log4j-test.properties")) {
+            PropertyConfigurator.configure(stream);
+        } catch (IOException e1) {
+            e1.printStackTrace(System.out);
+            BasicConfigurator.configure();
+            Logger.getRootLogger().setLevel(Level.INFO);
+            LOG.setLevel(Level.INFO);
+        }
         properties = new Properties();
         try (InputStream propStream = Utility.class.getResourceAsStream("/test.properties")) {
             if (propStream != null) {
@@ -257,6 +268,7 @@ public class Utility {
 
     public static ZcsPortType getZcsSvcEIF() {
         if (zcsSvcEIF == null) {
+            setUpToAcceptAllHttpsServerCerts();
             // The ZcsService class is the Java type bound to the service section of the WSDL document.
             ZcsService zcsSvc = new ZcsService();
             SchemaValidationFeature feature = new SchemaValidationFeature();
@@ -267,6 +279,7 @@ public class Utility {
 
     public static ZcsPortType getNonValidatingZcsSvcEIF() throws Exception {
         if (nvZcsSvcEIF == null) {
+            setUpToAcceptAllHttpsServerCerts();
             ZcsService zcsSvc = new ZcsService();
             setNvZcsSvcEIF(zcsSvc.getZcsServicePort());
         }
@@ -275,6 +288,7 @@ public class Utility {
 
     public static ZcsAdminPortType getAdminSvcEIF() {
         if (adminSvcEIF == null) {
+            setUpToAcceptAllHttpsServerCerts();
             // The ZcsAdminService class is the Java type bound to the service section of the WSDL document.
             ZcsAdminService zcsSvc = new ZcsAdminService();
             SchemaValidationFeature feature = new SchemaValidationFeature();
@@ -285,6 +299,7 @@ public class Utility {
 
     public static ZcsAdminPortType getNonValidatingAdminSvcEIF() throws Exception {
         if (nvAdminSvcEIF == null) {
+            setUpToAcceptAllHttpsServerCerts();
             ZcsAdminService zcsSvc = new ZcsAdminService();
             setNvAdminSvcEIF(zcsSvc.getZcsAdminServicePort());
         }
@@ -482,11 +497,10 @@ public class Utility {
         }
     }
 
-    public static void deleteVolumeIfExists(String name) throws Exception {
+    public static void deleteVolumeIfExists(String name) throws JAXBException, ParserConfigurationException {
         Utility.addSoapAdminAuthHeader((WSBindingProvider)getAdminSvcEIF());
         testGetAllVolumesRequest gavReq = new testGetAllVolumesRequest();
-        testGetAllVolumesResponse gavResp =
-                getAdminSvcEIF().getAllVolumesRequest(gavReq);
+        testGetAllVolumesResponse gavResp = getAdminSvcEIF().getAllVolumesRequest(gavReq);
         for (testVolumeInfo volume : gavResp.getVolume()) {
             if (name.equals(volume.getName())) {
                 testDeleteVolumeRequest delReq = new testDeleteVolumeRequest();
@@ -494,12 +508,13 @@ public class Utility {
                 getAdminSvcEIF().deleteVolumeRequest(delReq);
                 String volRootpath = volume.getRootpath();
                 try {
-                    if (volRootpath != null && (volRootpath.length() > 0))
+                    if (volRootpath != null && (volRootpath.length() > 0)) {
                         new File(volume.getRootpath()).deleteOnExit();
+                    }
                 } catch (Exception ex) {
                     LOG.debug(String.format(
                             "Exception %s thrown deleting rootPath=%s for volume=%s", ex.toString(), volRootpath,name));
-                return;
+                    return;
                 }
             }
         }
@@ -707,21 +722,38 @@ public class Utility {
     }
 
     public static Short ensureVolumeExists(String name, String rootPath)
-    throws Exception {
+            throws JAXBException, ParserConfigurationException
+    {
         Utility.addSoapAdminAuthHeader((WSBindingProvider)getAdminSvcEIF());
         testGetAllVolumesRequest gavReq = new testGetAllVolumesRequest();
-        testGetAllVolumesResponse gavResp =
-                getAdminSvcEIF().getAllVolumesRequest(gavReq);
+        testGetAllVolumesResponse gavResp = getAdminSvcEIF().getAllVolumesRequest(gavReq);
         for (testVolumeInfo volume : gavResp.getVolume()) {
             if (name.equals(volume.getName())) {
-                if (rootPath.equals(volume.getRootpath()))
+                if (rootPath.equals(volume.getRootpath())) {
                     return volume.getId();
+                }
                 deleteVolumeIfExists(name);
                 break;
             }
         }
-        Assert.assertTrue("Creating dir=" + rootPath +
-                " for volumeName=" + name, new File(rootPath).mkdir());
+        File rootPathFile = new File(rootPath);
+        if (!rootPathFile.exists()) {
+            if (!rootPathFile.mkdir()) {
+                LOG.info(String.format(
+                        "Unable to create dir='%s' for volumeName=%s - test runner MUST have permissions to do that",
+                        rootPath, name));
+                Assume.assumeTrue(false);
+            }
+            rootPathFile.setWritable(true);
+            try {
+                Files.setPosixFilePermissions(Paths.get(rootPath), PosixFilePermissions.fromString("rwxrwxrwx"));
+            } catch (IOException e) {
+                LOG.info(String.format(
+                        "Unable to make dir='%s' for volumeName=%s fully writable - test runner MUST have permissions to do that",
+                        rootPath, name));
+                Assume.assumeNoException(e);
+            }
+        }
         testCreateVolumeRequest req = new testCreateVolumeRequest();
         testVolumeInfo volume = new testVolumeInfo();
         volume.setName(name);
@@ -749,5 +781,21 @@ public class Utility {
         attr.setN(name);
         attr.setValue(value);
         return attr;
+    }
+
+    public static String getTestProperty(String key) {
+        return properties.getProperty(key);
+    }
+
+    public static String getAdminName() {
+        return getTestProperty(PROP_ADMIN_NAME);
+    }
+
+    public static String getAdminPassword() {
+        return getTestProperty(PROP_ADMIN_PASS);
+    }
+
+    public static String getOtherUsersPassword() {
+        return getTestProperty(PROP_OTHER_USERS_PASS);
     }
 }
