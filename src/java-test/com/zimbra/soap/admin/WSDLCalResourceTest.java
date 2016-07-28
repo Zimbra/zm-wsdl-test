@@ -2,11 +2,11 @@
  * ***** BEGIN LICENSE BLOCK *****
  * Zimbra Collaboration Suite Server
  * Copyright (C) 2011, 2013, 2014 Zimbra, Inc.
- * 
+ *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software Foundation,
  * version 2 of the License.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
@@ -18,7 +18,15 @@ package com.zimbra.soap.admin;
 
 import java.util.List;
 
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import com.sun.xml.ws.developer.WSBindingProvider;
+import com.zimbra.soap.Utility;
 
 import generated.zcsclient.admin.testAttr;
 import generated.zcsclient.admin.testCalendarResourceBy;
@@ -42,15 +50,6 @@ import generated.zcsclient.admin.testSearchCalendarResourcesRequest;
 import generated.zcsclient.admin.testSearchCalendarResourcesResponse;
 import generated.zcsclient.ws.service.ZcsAdminPortType;
 
-import com.zimbra.soap.Utility;
-
-import org.junit.Assert;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 public class WSDLCalResourceTest {
 
     private final static String testCalResDomain = "wsdl.calr.domain.example.test";
@@ -73,7 +72,7 @@ public class WSDLCalResourceTest {
             Utility.deleteCalendarResourceIfExists("foobar" + testCalRes);
             Utility.deleteDomainIfExists(testCalResDomain);
         } catch (Exception ex) {
-            System.err.println("Exception " + ex.toString() + 
+            System.err.println("Exception " + ex.toString() +
             " thrown inside oneTimeTearDown");
         }
     }
@@ -93,25 +92,20 @@ public class WSDLCalResourceTest {
         Utility.ensureDomainExists(testCalResDomain);
         testCreateCalendarResourceRequest createReq = new testCreateCalendarResourceRequest();
         createReq.setName(testCalRes);
-        createReq.setPassword("test123");
-        createReq.getA().add(Utility.mkAttr("displayName",
-                "WSDL Test Cal Resource"));
+        createReq.setPassword(Utility.getOtherUsersPassword());
+        createReq.getA().add(Utility.mkAttr("displayName", "WSDL Test Cal Resource"));
         createReq.getA().add(Utility.mkAttr("zimbraCalResType", "Location"));
-        createReq.getA().add(Utility.mkAttr(
-                "zimbraCalResLocationDisplayName", "Harare"));
+        createReq.getA().add(Utility.mkAttr( "zimbraCalResLocationDisplayName", "Harare"));
         Utility.addSoapAdminAuthHeader((WSBindingProvider)eif);
-        testCreateCalendarResourceResponse resp =
-                eif.createCalendarResourceRequest(createReq);
+        testCreateCalendarResourceResponse resp = eif.createCalendarResourceRequest(createReq);
         Assert.assertNotNull("CreateCalendarResourceResponse object", resp);
         testCalendarResourceInfo calResInfo = resp.getCalresource();
         Assert.assertNotNull("CalendarResourceInfo object", calResInfo);
-        Assert.assertEquals(
-                "createCalendarResourceResponse <calResource> 'name' attribute",
+        Assert.assertEquals("createCalendarResourceResponse <calResource> 'name' attribute",
                 testCalRes, calResInfo.getName());
         String testCalendarResourceId = calResInfo.getId();
         len = testCalendarResourceId.length();
-        Assert.assertTrue(
-                "length of <calResource> 'id' attribute length is " +
+        Assert.assertTrue("length of <calResource> 'id' attribute length is " +
                 len + " - should be longer than 10", len > 10);
         len = calResInfo.getA().size();
         Assert.assertTrue("CreateCalendarResourceResponse <calResource> has " +
@@ -159,7 +153,7 @@ public class WSDLCalResourceTest {
         Assert.assertNotNull("ModifyCalendarResourceResponse object", modResp);
         testCalendarResourceInfo calResInfo = modResp.getCalresource();
         Assert.assertNotNull("CalendarResourceInfo object", calResInfo);
-        Assert.assertEquals("modifyCalendarResourceResponse <calResource> 'name' attribute", 
+        Assert.assertEquals("modifyCalendarResourceResponse <calResource> 'name' attribute",
                 testCalRes, calResInfo.getName());
         respId = calResInfo.getId();
         Assert.assertEquals("modifyCalendarResourceResponse <calResource> 'id' attribute",
