@@ -2,11 +2,11 @@
  * ***** BEGIN LICENSE BLOCK *****
  * Zimbra Collaboration Suite Server
  * Copyright (C) 2010, 2011, 2012, 2013, 2014 Zimbra, Inc.
- * 
+ *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software Foundation,
  * version 2 of the License.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
@@ -23,16 +23,15 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sun.xml.ws.developer.WSBindingProvider;
+import com.zimbra.soap.Utility;
 
-import generated.zcsclient.zm.testAccountBy;
-import generated.zcsclient.zm.testAccountSelector;
 import generated.zcsclient.admin.testAuthRequest;
 import generated.zcsclient.admin.testAuthResponse;
 import generated.zcsclient.admin.testDelegateAuthRequest;
 import generated.zcsclient.admin.testDelegateAuthResponse;
 import generated.zcsclient.ws.service.ZcsAdminPortType;
-
-import com.zimbra.soap.Utility;
+import generated.zcsclient.zm.testAccountBy;
+import generated.zcsclient.zm.testAccountSelector;
 
 public class WSDLAdminAuthRequestTest {
 
@@ -49,9 +48,9 @@ public class WSDLAdminAuthRequestTest {
         testAuthRequest authReq = new testAuthRequest();
         testAccountSelector acct = new testAccountSelector();
         acct.setBy(testAccountBy.NAME);
-        acct.setValue("admin");
+        acct.setValue(Utility.getAdminName());
         authReq.setAccount(acct);
-        authReq.setPassword("test123");
+        authReq.setPassword(Utility.getAdminPassword());
         authReq.setAuthToken(null);
         testAuthResponse authResponse = eif.authRequest(authReq);
         Assert.assertNotNull(authResponse);
@@ -68,7 +67,7 @@ public class WSDLAdminAuthRequestTest {
         testAuthRequest authReq = new testAuthRequest();
         testAccountSelector acct = new testAccountSelector();
         acct.setBy(testAccountBy.NAME);
-        acct.setValue("admin");
+        acct.setValue(Utility.getAdminName());
         authReq.setAccount(acct);
         authReq.setPassword("BAD-ONE");
         authReq.setAuthToken(null);
@@ -79,8 +78,8 @@ public class WSDLAdminAuthRequestTest {
             Assert.fail("Should have had a fault resulting in an exception being thrown");
         } catch (SOAPFaultException sfe) {
             Assert.assertTrue(
-                    sfe.getMessage() + "should start with <authentication failed for >",
-                    sfe.getMessage().startsWith("authentication failed for "));
+                    sfe.getMessage() + "should contain <authentication failed for >",
+                    sfe.getMessage().contains("authentication failed for "));
         }
     }
 
@@ -91,7 +90,7 @@ public class WSDLAdminAuthRequestTest {
         acct.setBy(testAccountBy.NAME);
         acct.setValue("user1");
         authReq.setAccount(acct);
-        authReq.setPassword("test123");
+        authReq.setPassword(Utility.getOtherUsersPassword());
         authReq.setAuthToken(null);
         // Invoke the methods.
         try {
@@ -99,9 +98,10 @@ public class WSDLAdminAuthRequestTest {
             testAuthResponse authResponse = eif.authRequest(authReq);
             Assert.fail("Should have had a fault resulting in an exception being thrown");
         } catch (SOAPFaultException sfe) {
-            Assert.assertEquals("SOAP fault message - ",
-                    "permission denied: not an admin account",
-                    sfe.getMessage());
+            String errmsg = "permission denied: not an admin account";
+            Assert.assertTrue(
+                    String.format("SOAP fault message - [%s] should contain string [%s]", sfe.getMessage(), errmsg),
+                    sfe.getMessage().contains(errmsg));
         }
     }
 
