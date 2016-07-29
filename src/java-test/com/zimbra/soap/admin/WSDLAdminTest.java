@@ -339,7 +339,7 @@ public class WSDLAdminTest {
         Utility.addSoapAdminAuthHeader((WSBindingProvider)eif);
         testCacheSelector sel = new testCacheSelector();
         sel.setAllServers(true);
-        sel.setType(testCacheEntryType.DOMAIN.value());
+        sel.setType("domain");
         testFlushCacheRequest req = new testFlushCacheRequest();
         req.setCache(sel);
         testFlushCacheResponse resp = eif.flushCacheRequest(req);
