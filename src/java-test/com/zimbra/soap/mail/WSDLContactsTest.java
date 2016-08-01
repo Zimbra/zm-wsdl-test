@@ -2,11 +2,11 @@
  * ***** BEGIN LICENSE BLOCK *****
  * Zimbra Collaboration Suite Server
  * Copyright (C) 2011, 2012, 2013, 2014 Zimbra, Inc.
- * 
+ *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software Foundation,
  * version 2 of the License.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
@@ -17,6 +17,14 @@
 package com.zimbra.soap.mail;
 
 import java.util.List;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import com.sun.xml.ws.developer.WSBindingProvider;
 import com.zimbra.soap.Utility;
@@ -39,13 +47,6 @@ import generated.zcsclient.mail.testTagInfo;
 import generated.zcsclient.mail.testTagSpec;
 import generated.zcsclient.ws.service.ZcsPortType;
 import generated.zcsclient.zm.testContactAttr;
-
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 public class WSDLContactsTest {
 
@@ -182,6 +183,7 @@ public class WSDLContactsTest {
     }
 
     @Test
+    @Ignore("Bug 106102 - ModifyContactRequest WSDL / JAXB incorrect. member op is required, type and value are not")
     public void modifyContactGroup() throws Exception {
         final String fileAs = "bug75912";
         final String nickName = "contactGrp";
@@ -250,7 +252,7 @@ public class WSDLContactsTest {
         testContactGroupMember firstMember = modResp.getCn().getM().get(0);
         firstMember.getValue();
         Assert.assertEquals("After 1st mod first member value", qaTeam, firstMember.getValue());
- 
+
         // Modify to replace all members with one new member
         modReq = new testModifyContactRequest();
         modReq.setReplace(false);

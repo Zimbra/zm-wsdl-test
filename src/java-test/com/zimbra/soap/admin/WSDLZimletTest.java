@@ -2,11 +2,11 @@
  * ***** BEGIN LICENSE BLOCK *****
  * Zimbra Collaboration Suite Server
  * Copyright (C) 2011, 2013, 2014 Zimbra, Inc.
- * 
+ *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software Foundation,
  * version 2 of the License.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
@@ -20,22 +20,39 @@ import java.util.List;
 
 import javax.xml.bind.JAXBElement;
 
-import com.sun.xml.ws.developer.WSBindingProvider;
-
-import generated.zcsclient.admin.*;
-import generated.zcsclient.admin.testGetAdminExtensionZimletsResponse.Zimlets;
-import generated.zcsclient.ws.service.ZcsAdminPortType;
-import generated.zcsclient.zm.testNamedElement;
-
-import com.zimbra.soap.Utility;
-
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.junit.Assert;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3c.dom.Element;
+
+import com.sun.xml.ws.developer.WSBindingProvider;
+import com.zimbra.soap.Utility;
+
+import generated.zcsclient.admin.testAdminZimletConfigInfo;
+import generated.zcsclient.admin.testAdminZimletContext;
+import generated.zcsclient.admin.testAdminZimletDesc;
+import generated.zcsclient.admin.testAdminZimletInfo;
+import generated.zcsclient.admin.testAttr;
+import generated.zcsclient.admin.testGetAdminExtensionZimletsRequest;
+import generated.zcsclient.admin.testGetAdminExtensionZimletsResponse;
+import generated.zcsclient.admin.testGetAdminExtensionZimletsResponse.Zimlets;
+import generated.zcsclient.admin.testGetAllZimletsRequest;
+import generated.zcsclient.admin.testGetAllZimletsResponse;
+import generated.zcsclient.admin.testGetZimletRequest;
+import generated.zcsclient.admin.testGetZimletResponse;
+import generated.zcsclient.admin.testGetZimletStatusRequest;
+import generated.zcsclient.admin.testGetZimletStatusResponse;
+import generated.zcsclient.admin.testZimletInfo;
+import generated.zcsclient.admin.testZimletServerExtension;
+import generated.zcsclient.admin.testZimletStatus;
+import generated.zcsclient.admin.testZimletStatusCos;
+import generated.zcsclient.admin.testZimletStatusParent;
+import generated.zcsclient.admin.testZimletStatusSetting;
+import generated.zcsclient.ws.service.ZcsAdminPortType;
+import generated.zcsclient.zm.testNamedElement;
 
 public class WSDLZimletTest {
 
@@ -45,27 +62,6 @@ public class WSDLZimletTest {
     public static void init() throws Exception {
         Utility.setUpToAcceptAllHttpsServerCerts();
         eif = Utility.getAdminSvcEIF();
-        oneTimeTearDown();
-    }
-
-    @AfterClass
-    public static void oneTimeTearDown() {
-        // one-time cleanup code
-        try {
-            // Utility.deleteAccountIfExists(testAcct);
-            // Utility.deleteDomainIfExists(testAcctDomain);
-        } catch (Exception ex) {
-            System.err.println("Exception " + ex.toString() + 
-            " thrown inside oneTimeTearDown");
-        }
-    }
-
-    @Before
-    public void setUp() throws Exception {
-    }
-
-    @After
-    public void tearDown() throws Exception {
     }
 
     @Test
@@ -78,8 +74,7 @@ public class WSDLZimletTest {
         List<testZimletInfo> zimlets = resp.getZimlet();
         Assert.assertNotNull("zimlets list object", zimlets);
         int zNum = zimlets.size();
-        Assert.assertTrue("Number of zimlets=" + zNum +
-                "is at least 4", zNum >= 4);
+        Assert.assertTrue("Number of zimlets=" + zNum + "is at least 4", zNum >= 4);
         int cnt = 0;
         for (testZimletInfo zimlet : zimlets) {
             cnt++;
@@ -128,17 +123,14 @@ public class WSDLZimletTest {
         Assert.assertNotNull("GetZimletStatusResponse object", resp);
         testZimletStatusParent parent = resp.getZimlets();
         int zNum = parent.getZimlet().size();
-        Assert.assertTrue("Number of zimlets=" + zNum +
-                "is at least 4", zNum >= 4);
+        Assert.assertTrue("Number of zimlets=" + zNum + "is at least 4", zNum >= 4);
         int zCnt = 0;
         for (testZimletStatus zimlet : parent.getZimlet()) {
             zCnt++;
             String zTag = "zimlet " + zCnt;
             Assert.assertNotNull(zTag + " name", zimlet.getName());
-            Assert.assertTrue(zTag + " priority >= 0",
-                    zimlet.getPriority() >= 0);
-            Assert.assertEquals(zTag + " status", testZimletStatusSetting.ENABLED,
-                    zimlet.getStatus());
+            Assert.assertTrue(zTag + " priority >= 0", zimlet.getPriority() >= 0);
+            Assert.assertEquals(zTag + " status", testZimletStatusSetting.ENABLED, zimlet.getStatus());
             // ZimbraServer deployed zimlets happen to have false for all
             // zimlets but ZimbraNetwork has some extensions.
             // Changed test to just be for existence of "isExtension" method.
@@ -146,8 +138,7 @@ public class WSDLZimletTest {
         }
         List<testZimletStatusCos> coses = resp.getCos();
         zNum = coses.size();
-        Assert.assertTrue("Number of zimlets=" + zNum +
-                "is at least 1", zNum >= 1);
+        Assert.assertTrue("Number of zimlets=" + zNum + "is at least 1", zNum >= 1);
         int cCnt = 0;
         for (testZimletStatusCos cos : coses) {
             cCnt++;
@@ -159,10 +150,8 @@ public class WSDLZimletTest {
                 String zTag = cTag + " zimlet " + zCnt;
                 Assert.assertNotNull(zTag + " name", zimlet.getName());
                 zimlet.getPriority();  // probably null
-                Assert.assertEquals(zTag + " status",
-                        testZimletStatusSetting.ENABLED, zimlet.getStatus());
-                Assert.assertFalse(zTag + " extension setting",
-                        zimlet.isExtension());
+                Assert.assertEquals(zTag + " status", testZimletStatusSetting.ENABLED, zimlet.getStatus());
+                Assert.assertFalse(zTag + " extension setting", zimlet.isExtension());
             }
         }
     }
@@ -181,12 +170,12 @@ public class WSDLZimletTest {
         Zimlets zimlets = resp.getZimlets();
         Assert.assertNotNull("GetAdminExtensionZimletsResponse/zimlets object", zimlets);
         List<testAdminZimletInfo> azimlets = zimlets.getZimlet();
-        System.out.println("Number of zimlets=" + azimlets.size());
+        Utility.LOG.debug("Number of zimlets=" + azimlets.size());
         for (testAdminZimletInfo azi : azimlets) {
             testAdminZimletContext ctx = azi.getZimletContext();
             if (ctx != null) {
                 Assert.assertNotNull("ZimletContext baseUrl object", ctx.getBaseUrl());
-                System.out.println("zimlet context baseUrl=" + ctx.getBaseUrl());
+                Utility.LOG.debug("zimlet context baseUrl=" + ctx.getBaseUrl());
                 Assert.assertNotNull("ZimletContext presence object", ctx.getPresence());
                 ctx.getPriority(); // optional
             }
@@ -195,7 +184,7 @@ public class WSDLZimletTest {
                 Assert.assertNotNull("ZimletConfig description object", cfg.getDescription());
                 Assert.assertNotNull("ZimletConfig extension object", cfg.getExtension());
                 Assert.assertNotNull("ZimletConfig name object", cfg.getName());
-                System.out.println("zimlet name=" + cfg.getName());
+                Utility.LOG.debug("zimlet name=" + cfg.getName());
                 cfg.getLabel();
                 cfg.getTarget();
                 cfg.getVersion();
@@ -207,7 +196,7 @@ public class WSDLZimletTest {
                 Assert.assertNotNull("ZimletDesc description object", zimletDesc.getDescription());
                 Assert.assertNotNull("ZimletDesc extension object", zimletDesc.getExtension());
                 Assert.assertNotNull("ZimletDesc name object", zimletDesc.getName());
-                System.out.println("zimlet name=" + zimletDesc.getName());
+                Utility.LOG.debug("zimlet name=" + zimletDesc.getName());
                 zimletDesc.getLabel();
                 zimletDesc.getTarget();
                 zimletDesc.getVersion();
@@ -217,14 +206,10 @@ public class WSDLZimletTest {
                 for (Object obj : objs) {
                     if (obj instanceof Element) {
                         Element elem = (Element)obj;
-                        System.out.println(
-                                "getAdminExtensionZimletsTest - Element name " +
-                                elem.getLocalName());
+                        Utility.LOG.debug("getAdminExtensionZimletsTest - Element name " + elem.getLocalName());
                     } else if (obj instanceof testZimletServerExtension) {
                         testZimletServerExtension zse = (testZimletServerExtension) obj;
-                        Assert.assertNotNull(
-                                "ZimletDesc server extension HasKeyword object",
-                                zse.getHasKeyword());
+                        Assert.assertNotNull("ZimletDesc server extension HasKeyword object", zse.getHasKeyword());
                         zse.getExtensionClass();
                         zse.getRegex();
                     } else if (obj instanceof JAXBElement) {
@@ -232,11 +217,8 @@ public class WSDLZimletTest {
                         JAXBElement jaxbElem = (JAXBElement) obj;
                         @SuppressWarnings("rawtypes")
                         Class klass = jaxbElem.getDeclaredType();
-                        System.out.println(
-                                "ZimletDesc klass wrapped by JAXBElement=" +
-                                klass.getName() +
-                                " elemName=" + jaxbElem.getName() +
-                                " value=" + jaxbElem.getValue().toString());
+                        Utility.LOG.debug("ZimletDesc klass wrapped by JAXBElement=" + klass.getName() +
+                                " elemName=" + jaxbElem.getName() + " value=" + jaxbElem.getValue().toString());
                     }
                 }
             }

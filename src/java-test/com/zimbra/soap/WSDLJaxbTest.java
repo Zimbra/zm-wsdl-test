@@ -45,29 +45,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3c.dom.Node;
 
-import com.zimbra.soap.account.message.GetInfoResponse;
 
-/**
- * Unit test for {@link GetInfoResponse} which exercises
- * translation to and from Element
- *
- * @author Gren Elliot
- */
 public class WSDLJaxbTest {
-    private static final Logger LOG = Logger.getLogger(WSDLJaxbTest.class);
-
-    static {
-        BasicConfigurator.configure();
-        Logger.getRootLogger().setLevel(Level.INFO);
-        LOG.setLevel(Level.INFO);
-    }
 
     @BeforeClass
     public static void init() throws Exception {
-        // JAXBContext jaxb = JAXBContext.newInstance(GetInfoResponse.class);
-        // unmarshaller = jaxb.createUnmarshaller();
-        // getInfoResp = (GetInfoResponse) unmarshaller.unmarshal(
-        //     JaxbToElementTest.class.getResourceAsStream("GetInfoResponse.xml"));
     }
 
     /**
@@ -95,7 +77,7 @@ public class WSDLJaxbTest {
         marshaller.marshal(jbe, domRes);
         Node docNode = domRes.getNode();
         String eXml = domToString((org.w3c.dom.Document) docNode);
-        LOG.info("ConvActionRequestJaxbSubclassHandling: marshalled XML=" + eXml);
+        Utility.LOG.debug("ConvActionRequestJaxbSubclassHandling: marshalled XML=" + eXml);
         Assert.assertTrue("Xml should contain recursive attribute", eXml.contains("l=\"folder\""));
         Unmarshaller unmarshaller = jaxb.createUnmarshaller();
         org.w3c.dom.Document doc = toW3cDom(eXml);
@@ -144,9 +126,9 @@ public class WSDLJaxbTest {
             transformer.transform(xmlSource, result);
             return result.getOutputStream().toString();
         } catch (TransformerFactoryConfigurationError factoryError) {
-            LOG.error("Error creating TransformerFactory", factoryError);
+            Utility.LOG.error("Error creating TransformerFactory", factoryError);
         } catch (TransformerException transformerError) {
-            LOG.error( "Error transforming document", transformerError);
+            Utility.LOG.error( "Error transforming document", transformerError);
         }
         return null;
     }

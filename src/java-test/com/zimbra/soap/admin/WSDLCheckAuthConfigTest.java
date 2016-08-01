@@ -2,11 +2,11 @@
  * ***** BEGIN LICENSE BLOCK *****
  * Zimbra Collaboration Suite Server
  * Copyright (C) 2011, 2013, 2014 Zimbra, Inc.
- * 
+ *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software Foundation,
  * version 2 of the License.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
@@ -18,19 +18,19 @@ package com.zimbra.soap.admin;
 
 import javax.xml.ws.soap.SOAPFaultException;
 
-import com.sun.xml.ws.developer.WSBindingProvider;
-
-import generated.zcsclient.admin.*;
-import generated.zcsclient.ws.service.ZcsAdminPortType;
-
-import com.zimbra.soap.Utility;
-
-import org.junit.Assert;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import com.sun.xml.ws.developer.WSBindingProvider;
+import com.zimbra.soap.Utility;
+
+import generated.zcsclient.admin.testAttr;
+import generated.zcsclient.admin.testCheckAuthConfigRequest;
+import generated.zcsclient.ws.service.ZcsAdminPortType;
 
 public class WSDLCheckAuthConfigTest {
 
@@ -52,7 +52,7 @@ public class WSDLCheckAuthConfigTest {
             Utility.deleteAccountIfExists(testAcct);
             Utility.deleteDomainIfExists(testAcctDomain);
         } catch (Exception ex) {
-            System.err.println("Exception " + ex.toString() + 
+            System.err.println("Exception " + ex.toString() +
             " thrown inside oneTimeTearDown");
         }
     }
@@ -72,7 +72,7 @@ public class WSDLCheckAuthConfigTest {
         Utility.addSoapAdminAuthHeader((WSBindingProvider)eif);
         testCheckAuthConfigRequest req = new testCheckAuthConfigRequest();
         req.setName(testAcct);
-        req.setPassword("test123");
+        req.setPassword(Utility.getOtherUsersPassword());
         testAttr attr;
         attr = new testAttr(); attr.setN("zimbraAuthMech");
         attr.setValue("ldap");

@@ -2,11 +2,11 @@
  * ***** BEGIN LICENSE BLOCK *****
  * Zimbra Collaboration Suite Server
  * Copyright (C) 2011, 2012, 2013, 2014 Zimbra, Inc.
- * 
+ *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software Foundation,
  * version 2 of the License.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
@@ -19,24 +19,37 @@ package com.zimbra.soap.admin;
 import java.io.File;
 import java.util.List;
 
-import com.sun.xml.ws.developer.WSBindingProvider;
-
-import generated.zcsclient.admin.*;
-import generated.zcsclient.ws.service.ZcsAdminPortType;
-
-import com.zimbra.soap.Utility;
-
-import org.junit.Assert;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.sun.xml.ws.developer.WSBindingProvider;
+import com.zimbra.soap.Utility;
+
+import generated.zcsclient.admin.testCurrentVolumeInfo;
+import generated.zcsclient.admin.testDeleteVolumeRequest;
+import generated.zcsclient.admin.testDeleteVolumeResponse;
+import generated.zcsclient.admin.testGetAllVolumesRequest;
+import generated.zcsclient.admin.testGetAllVolumesResponse;
+import generated.zcsclient.admin.testGetCurrentVolumesRequest;
+import generated.zcsclient.admin.testGetCurrentVolumesResponse;
+import generated.zcsclient.admin.testGetVolumeRequest;
+import generated.zcsclient.admin.testGetVolumeResponse;
+import generated.zcsclient.admin.testModifyVolumeRequest;
+import generated.zcsclient.admin.testModifyVolumeResponse;
+import generated.zcsclient.admin.testSetCurrentVolumeRequest;
+import generated.zcsclient.admin.testSetCurrentVolumeResponse;
+import generated.zcsclient.admin.testVolumeInfo;
+import generated.zcsclient.ws.service.ZcsAdminPortType;
+
 public class WSDLVolumeAdminTest {
 
     private final static String testVolume = "wsdlTestVolume";
-    private final static String testVolumePath = "/opt/zimbra/wsdlTestVolume";
+    // private final static String testVolumePath = "/opt/zimbra/wsdlTestVolume";
+    private final static String testVolumePath = "/tmp/zimbra-wsdlTestVolume";
     private static ZcsAdminPortType eif = null;
 
     @BeforeClass
@@ -53,7 +66,7 @@ public class WSDLVolumeAdminTest {
         try {
             new File(testVolumePath).deleteOnExit();
         } catch (Exception ex) {
-            System.err.println("Exception " + ex.toString() + 
+            System.err.println("Exception " + ex.toString() +
             " thrown inside oneTimeTearDown");
         }
     }

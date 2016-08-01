@@ -2,11 +2,11 @@
  * ***** BEGIN LICENSE BLOCK *****
  * Zimbra Collaboration Suite Server
  * Copyright (C) 2010, 2011, 2012, 2013, 2014 Zimbra, Inc.
- * 
+ *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software Foundation,
  * version 2 of the License.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
@@ -15,6 +15,39 @@
  * ***** END LICENSE BLOCK *****
  */
 package com.zimbra.soap;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.util.Map;
+import java.util.Properties;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.ws.soap.SOAPFaultException;
+
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
+import org.junit.Assert;
+import org.junit.Assume;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import com.google.common.collect.Maps;
+import com.sun.xml.bind.api.JAXBRIContext;
+import com.sun.xml.ws.api.message.Header;
+import com.sun.xml.ws.api.message.Headers;
+import com.sun.xml.ws.developer.SchemaValidationFeature;
+import com.sun.xml.ws.developer.WSBindingProvider;
 
 import generated.zcsclient.account.testAuthRequest;
 import generated.zcsclient.account.testAuthResponse;
@@ -89,39 +122,51 @@ import generated.zcsclient.zm.testAccountSelector;
 import generated.zcsclient.zm.testAuthTokenControl;
 import generated.zcsclient.zm.testHeaderContext;
 
-import java.io.File;
-import java.util.Map;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.ws.soap.SOAPFaultException;
-
-import org.junit.Assert;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import com.google.common.collect.Maps;
-import com.sun.xml.bind.api.JAXBRIContext;
-import com.sun.xml.ws.api.message.Header;
-import com.sun.xml.ws.api.message.Headers;
-import com.sun.xml.ws.developer.SchemaValidationFeature;
-import com.sun.xml.ws.developer.WSBindingProvider;
-
 /**
  * Current assumption : user1 exists with password test123
  */
 public class Utility {
     private static final String DEFAULT_PASS = "test123";
+    private static final String PROP_ADMIN_NAME = "adminName";
+    private static final String PROP_ADMIN_PASS = "adminPass";
+    private static final String PROP_OTHER_USERS_PASS = "otherUsersPass";
     private static ZcsPortType zcsSvcEIF = null;
     private static ZcsPortType nvZcsSvcEIF = null;
     private static ZcsAdminPortType adminSvcEIF = null;
     private static ZcsAdminPortType nvAdminSvcEIF = null;
     private static String adminAuthToken = null;
     private static Map<String,String> acctAuthToks = Maps.newHashMap();
+    private static Properties properties = null;
+
+    public static final Logger LOG = Logger.getLogger("zimbra.test");
+
+    static {
+        try (final InputStream stream = Utility.class.getResourceAsStream("/log4j-test.properties")) {
+            PropertyConfigurator.configure(stream);
+        } catch (IOException e1) {
+            e1.printStackTrace(System.out);
+            BasicConfigurator.configure();
+            Logger.getRootLogger().setLevel(Level.INFO);
+            LOG.setLevel(Level.INFO);
+        }
+        properties = new Properties();
+        try (InputStream propStream = Utility.class.getResourceAsStream("/test.properties")) {
+            if (propStream != null) {
+                properties.load(propStream);
+            }
+        } catch (IOException e) {
+            LOG.info("Problem loading properties from test.properties", e);
+        }
+        if (!properties.containsKey(PROP_ADMIN_NAME)) {
+            properties.setProperty(PROP_ADMIN_NAME, "admin");
+        }
+        if (!properties.containsKey(PROP_ADMIN_PASS)) {
+            properties.setProperty(PROP_ADMIN_PASS, DEFAULT_PASS);
+        }
+        if (!properties.containsKey(PROP_OTHER_USERS_PASS)) {
+            properties.setProperty(PROP_OTHER_USERS_PASS, DEFAULT_PASS);
+        }
+    }
 
     public static void addSoapAuthHeader(WSBindingProvider bp, String authToken)
     throws JAXBException, ParserConfigurationException {
@@ -168,7 +213,7 @@ public class Utility {
         if (acctAuthToks.containsKey(acctName))
             authTok = acctAuthToks.get(acctName);
         else {
-            authTok = Utility.getAccountServiceAuthToken(acctName, DEFAULT_PASS);
+            authTok = getAccountServiceAuthToken(acctName, properties.getProperty(PROP_OTHER_USERS_PASS));
             acctAuthToks.put(acctName, authTok);
         }
         addSoapAcctAuthHeader(bp, authTok);
@@ -185,7 +230,7 @@ public class Utility {
         String acctName = "user1";
         if (acctAuthToks.containsKey(acctName))
             return acctAuthToks.get(acctName);
-        return getAccountServiceAuthToken(acctName, DEFAULT_PASS);
+        return getAccountServiceAuthToken(acctName, properties.getProperty(PROP_OTHER_USERS_PASS));
     }
 
     public static String getAccountServiceAuthToken(String acctName, String password)
@@ -223,6 +268,7 @@ public class Utility {
 
     public static ZcsPortType getZcsSvcEIF() {
         if (zcsSvcEIF == null) {
+            setUpToAcceptAllHttpsServerCerts();
             // The ZcsService class is the Java type bound to the service section of the WSDL document.
             ZcsService zcsSvc = new ZcsService();
             SchemaValidationFeature feature = new SchemaValidationFeature();
@@ -233,6 +279,7 @@ public class Utility {
 
     public static ZcsPortType getNonValidatingZcsSvcEIF() throws Exception {
         if (nvZcsSvcEIF == null) {
+            setUpToAcceptAllHttpsServerCerts();
             ZcsService zcsSvc = new ZcsService();
             setNvZcsSvcEIF(zcsSvc.getZcsServicePort());
         }
@@ -241,6 +288,7 @@ public class Utility {
 
     public static ZcsAdminPortType getAdminSvcEIF() {
         if (adminSvcEIF == null) {
+            setUpToAcceptAllHttpsServerCerts();
             // The ZcsAdminService class is the Java type bound to the service section of the WSDL document.
             ZcsAdminService zcsSvc = new ZcsAdminService();
             SchemaValidationFeature feature = new SchemaValidationFeature();
@@ -251,6 +299,7 @@ public class Utility {
 
     public static ZcsAdminPortType getNonValidatingAdminSvcEIF() throws Exception {
         if (nvAdminSvcEIF == null) {
+            setUpToAcceptAllHttpsServerCerts();
             ZcsAdminService zcsSvc = new ZcsAdminService();
             setNvAdminSvcEIF(zcsSvc.getZcsAdminServicePort());
         }
@@ -264,9 +313,9 @@ public class Utility {
             generated.zcsclient.admin.testAuthRequest authReq = new generated.zcsclient.admin.testAuthRequest();
             generated.zcsclient.zm.testAccountSelector acct = new generated.zcsclient.zm.testAccountSelector();
             acct.setBy(generated.zcsclient.zm.testAccountBy.NAME);
-            acct.setValue("admin");
+            acct.setValue(properties.getProperty(PROP_ADMIN_NAME));
             authReq.setAccount(acct);
-            authReq.setPassword(DEFAULT_PASS);
+            authReq.setPassword(properties.getProperty(PROP_ADMIN_PASS));
             authReq.setAuthToken(null);
             generated.zcsclient.admin.testAuthResponse authResponse = getAdminSvcEIF().authRequest(authReq);
             Assert.assertNotNull(authResponse);
@@ -296,7 +345,17 @@ public class Utility {
             javax.net.ssl.SSLContext sc = javax.net.ssl.SSLContext.getInstance("SSL");
             sc.init(null, trustAllCerts, new java.security.SecureRandom());
             javax.net.ssl.HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-        } catch (Exception e) { }
+        } catch (Exception e) {
+            LOG.debug("Problem installing the all-trusting trust manager", e);
+        }
+
+        javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(new javax.net.ssl.HostnameVerifier() {
+
+            @Override
+            public boolean verify(String hostname, javax.net.ssl.SSLSession sslSession) {
+                return true;
+            }
+        });
     }
 
     public static void deleteDomainIfExists(String domainName) throws Exception {
@@ -318,9 +377,10 @@ public class Utility {
             }
         } catch (SOAPFaultException sfe) {
             String missive = sfe.getMessage();
-            if (!missive.startsWith("no such domain:"))
-                System.err.println("Exception " + sfe.toString() +
-                        " thrown attempting to delete domain " + domainName);
+            if (!missive.startsWith("no such domain:")) {
+                LOG.debug(String.format(
+                        "Exception %s thrown attempting to delete domain %s", sfe.toString(), domainName));
+            }
         }
     }
 
@@ -343,9 +403,10 @@ public class Utility {
             }
         } catch (SOAPFaultException sfe) {
             String missive = sfe.getMessage();
-            if (!missive.startsWith("no such server:"))
-                System.err.println("Exception " + sfe.toString() +
-                        " thrown attempting to delete domain " + serverName);
+            if (!missive.startsWith("no such server:")) {
+                LOG.debug(String.format(
+                        "Exception %s thrown attempting to delete server %s", sfe.toString(), serverName));
+            }
         }
     }
 
@@ -371,9 +432,10 @@ public class Utility {
             Assert.assertNotNull(delResp);
         } catch (SOAPFaultException sfe) {
             String missive = sfe.getMessage();
-            if (!missive.startsWith("no such account:"))
-                System.err.println("Exception " + sfe.toString() +
-                        " thrown attempting to delete account " + accountName);
+            if (!missive.startsWith("no such account:")) {
+                LOG.debug(String.format(
+                        "Exception %s thrown attempting to delete account %s", sfe.toString(), accountName));
+            }
         }
     }
 
@@ -402,10 +464,10 @@ public class Utility {
             Assert.assertNotNull(delResp);
         } catch (SOAPFaultException sfe) {
             String missive = sfe.getMessage();
-            if (!missive.startsWith("no such calendar resource:"))
-                System.err.println("Exception " + sfe.toString() +
-                        " thrown attempting to delete CalendarResource "
-                        + calResourceName);
+            if (!missive.startsWith("no such calendar resource:")) {
+                LOG.debug(String.format("Exception %s thrown attempting to delete calendar resource %s",
+                        sfe.toString(), calResourceName));
+            }
         }
     }
 
@@ -428,17 +490,17 @@ public class Utility {
             Assert.assertNotNull(delResp);
         } catch (SOAPFaultException sfe) {
             String missive = sfe.getMessage();
-            if (!missive.startsWith("no such cos:"))
-                System.err.println("Exception " + sfe.toString() +
-                        " thrown attempting to delete cos " + cosName);
+            if (!missive.startsWith("no such cos:")) {
+                LOG.debug(String.format("Exception %s thrown attempting to delete COS %s",
+                        sfe.toString(), cosName));
+            }
         }
     }
 
-    public static void deleteVolumeIfExists(String name) throws Exception {
+    public static void deleteVolumeIfExists(String name) throws JAXBException, ParserConfigurationException {
         Utility.addSoapAdminAuthHeader((WSBindingProvider)getAdminSvcEIF());
         testGetAllVolumesRequest gavReq = new testGetAllVolumesRequest();
-        testGetAllVolumesResponse gavResp =
-                getAdminSvcEIF().getAllVolumesRequest(gavReq);
+        testGetAllVolumesResponse gavResp = getAdminSvcEIF().getAllVolumesRequest(gavReq);
         for (testVolumeInfo volume : gavResp.getVolume()) {
             if (name.equals(volume.getName())) {
                 testDeleteVolumeRequest delReq = new testDeleteVolumeRequest();
@@ -446,13 +508,13 @@ public class Utility {
                 getAdminSvcEIF().deleteVolumeRequest(delReq);
                 String volRootpath = volume.getRootpath();
                 try {
-                    if (volRootpath != null && (volRootpath.length() > 0))
+                    if (volRootpath != null && (volRootpath.length() > 0)) {
                         new File(volume.getRootpath()).deleteOnExit();
+                    }
                 } catch (Exception ex) {
-                    System.err.println("Exception " + ex.toString() +
-                    " thrown inside deleteVolumeIfExists - deleting rootPath="
-                            + volRootpath + " for volume=" + name);
-                return;
+                    LOG.debug(String.format(
+                            "Exception %s thrown deleting rootPath=%s for volume=%s", ex.toString(), volRootpath,name));
+                    return;
                 }
             }
         }
@@ -474,9 +536,10 @@ public class Utility {
                     getAdminSvcEIF().deleteDistributionListRequest(delReq));
         } catch (SOAPFaultException sfe) {
             String missive = sfe.getMessage();
-            if (!missive.startsWith("no such distribution list:"))
-                System.err.println("Exception " + sfe.toString() +
-                        " thrown attempting to delete dl " + name);
+            if (!missive.startsWith("no such distribution list:")) {
+                LOG.debug(String.format("Exception %s thrown attempting to delete distribution list %s",
+                        sfe.toString(), name));
+            }
         }
     }
 
@@ -552,7 +615,7 @@ public class Utility {
         } catch (SOAPFaultException sfe) {
             testCreateAccountRequest createAcctReq = new testCreateAccountRequest();
             createAcctReq.setName(accountName);
-            createAcctReq.setPassword(DEFAULT_PASS);
+            createAcctReq.setPassword(properties.getProperty(PROP_OTHER_USERS_PASS));
             Utility.addSoapAdminAuthHeader((WSBindingProvider)adminSvcEIF);
             testCreateAccountResponse resp =
                     adminSvcEIF.createAccountRequest(createAcctReq);
@@ -580,7 +643,7 @@ public class Utility {
         } catch (SOAPFaultException sfe) {
             testCreateCalendarResourceRequest createAcctReq = new testCreateCalendarResourceRequest();
             createAcctReq.setName(calResourceName);
-            createAcctReq.setPassword(DEFAULT_PASS);
+            createAcctReq.setPassword(properties.getProperty(PROP_OTHER_USERS_PASS));
             createAcctReq.getA().add(Utility.mkAttr("displayName", displayName));
             createAcctReq.getA().add(Utility.mkAttr("zimbraCalResType", "Location"));
             createAcctReq.getA().add(Utility.mkAttr("zimbraCalResLocationDisplayName", "Harare"));
@@ -608,7 +671,6 @@ public class Utility {
         Utility.addSoapAdminAuthHeader((WSBindingProvider)adminSvcEIF);
         testGetMailboxResponse gmResp = adminSvcEIF.getMailboxRequest(gmReq);
         Assert.assertNotNull(gmResp);
-        // getAccountServiceAuthToken(accountName, DEFAULT_PASS);
         return accountId;
     }
 
@@ -660,21 +722,38 @@ public class Utility {
     }
 
     public static Short ensureVolumeExists(String name, String rootPath)
-    throws Exception {
+            throws JAXBException, ParserConfigurationException
+    {
         Utility.addSoapAdminAuthHeader((WSBindingProvider)getAdminSvcEIF());
         testGetAllVolumesRequest gavReq = new testGetAllVolumesRequest();
-        testGetAllVolumesResponse gavResp =
-                getAdminSvcEIF().getAllVolumesRequest(gavReq);
+        testGetAllVolumesResponse gavResp = getAdminSvcEIF().getAllVolumesRequest(gavReq);
         for (testVolumeInfo volume : gavResp.getVolume()) {
             if (name.equals(volume.getName())) {
-                if (rootPath.equals(volume.getRootpath()))
+                if (rootPath.equals(volume.getRootpath())) {
                     return volume.getId();
+                }
                 deleteVolumeIfExists(name);
                 break;
             }
         }
-        Assert.assertTrue("Creating dir=" + rootPath +
-                " for volumeName=" + name, new File(rootPath).mkdir());
+        File rootPathFile = new File(rootPath);
+        if (!rootPathFile.exists()) {
+            if (!rootPathFile.mkdir()) {
+                LOG.info(String.format(
+                        "Unable to create dir='%s' for volumeName=%s - test runner MUST have permissions to do that",
+                        rootPath, name));
+                Assume.assumeTrue(false);
+            }
+            rootPathFile.setWritable(true);
+            try {
+                Files.setPosixFilePermissions(Paths.get(rootPath), PosixFilePermissions.fromString("rwxrwxrwx"));
+            } catch (IOException e) {
+                LOG.info(String.format(
+                        "Unable to make dir='%s' for volumeName=%s fully writable - test runner MUST have permissions to do that",
+                        rootPath, name));
+                Assume.assumeNoException(e);
+            }
+        }
         testCreateVolumeRequest req = new testCreateVolumeRequest();
         testVolumeInfo volume = new testVolumeInfo();
         volume.setName(name);
@@ -702,5 +781,21 @@ public class Utility {
         attr.setN(name);
         attr.setValue(value);
         return attr;
+    }
+
+    public static String getTestProperty(String key) {
+        return properties.getProperty(key);
+    }
+
+    public static String getAdminName() {
+        return getTestProperty(PROP_ADMIN_NAME);
+    }
+
+    public static String getAdminPassword() {
+        return getTestProperty(PROP_ADMIN_PASS);
+    }
+
+    public static String getOtherUsersPassword() {
+        return getTestProperty(PROP_OTHER_USERS_PASS);
     }
 }

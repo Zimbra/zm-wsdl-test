@@ -14,4 +14,10 @@ From `ZimbraSoap`:
 
 ## Artifacts
 
-- TODO
+- N/A Sole purpose of this repo is to test Zimbra's WSDL support.  
+  Zimbra MUST be fully installed on the same host.
+
+## Requirements
+
+* **admin** user must exist in the default domain with password **test123**
+* **user1** user must exist in the default domain with password **test123**
