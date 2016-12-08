@@ -136,15 +136,21 @@ public class Utility {
     private static ZcsAdminPortType nvAdminSvcEIF = null;
     private static String adminAuthToken = null;
     private static Map<String,String> acctAuthToks = Maps.newHashMap();
+    private static Properties log4jProperties = null;
     private static Properties properties = null;
 
     public static final Logger LOG = Logger.getLogger("zimbra.test");
 
     static {
-        try (final InputStream stream = Utility.class.getResourceAsStream("/log4j-test.properties")) {
-            PropertyConfigurator.configure(stream);
-        } catch (IOException e1) {
-            e1.printStackTrace(System.out);
+        log4jProperties = new Properties();
+        try (final InputStream propStream = Utility.class.getResourceAsStream("/log4j-test.properties")) {
+            if (propStream != null) {
+                log4jProperties.load(propStream);
+            }
+            PropertyConfigurator.configure(log4jProperties);
+        } catch (IOException e) {
+            LOG.info("Problem loading properties from log4j-test.properties", e);
+            e.printStackTrace(System.out);
             BasicConfigurator.configure();
             Logger.getRootLogger().setLevel(Level.INFO);
             LOG.setLevel(Level.INFO);
