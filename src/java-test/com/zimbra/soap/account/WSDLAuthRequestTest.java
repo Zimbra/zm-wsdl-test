@@ -26,6 +26,7 @@ import com.zimbra.soap.Utility;
 
 import generated.zcsclient.account.testAuthRequest;
 import generated.zcsclient.account.testAuthResponse;
+import generated.zcsclient.ws.service.ZcsAdminPortType;
 import generated.zcsclient.ws.service.ZcsPortType;
 import generated.zcsclient.zm.testAccountBy;
 import generated.zcsclient.zm.testAccountSelector;
@@ -33,10 +34,12 @@ import generated.zcsclient.zm.testAccountSelector;
 public class WSDLAuthRequestTest {
 
     private static ZcsPortType eif;
+    private static ZcsAdminPortType adminEif;
 
     @BeforeClass
     public static void init() throws Exception {
         eif = Utility.getZcsSvcEIF();
+        adminEif = Utility.getAdminSvcEIF();
     }
 
     /**
