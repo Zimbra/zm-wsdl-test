@@ -793,6 +793,19 @@ public class Utility {
         return properties.getProperty(key);
     }
 
+    /**
+     * Will create the account.  If the string doesn't contain an @, will assume it is in the default domain
+     */
+    public void createAccount(String testAcct) throws Exception {
+        testCreateAccountRequest createAcctReq = new testCreateAccountRequest();
+        createAcctReq.setName(testAcct);
+        createAcctReq.setPassword(Utility.getOtherUsersPassword());
+        ZcsAdminPortType eif =Utility.getAdminSvcEIF();
+        Utility.addSoapAdminAuthHeader((WSBindingProvider)eif);
+        testCreateAccountResponse resp = eif.createAccountRequest(createAcctReq);
+        Assert.assertNotNull("CreateAccountResponse object", resp);
+    }
+
     public static String getAdminName() {
         return getTestProperty(PROP_ADMIN_NAME);
     }
