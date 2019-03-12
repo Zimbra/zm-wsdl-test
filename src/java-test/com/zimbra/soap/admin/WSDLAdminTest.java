@@ -25,6 +25,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Element;
 
@@ -332,6 +333,19 @@ public class WSDLAdminTest {
         long totalSize = mboxStats.getTotalSize();
         Assert.assertTrue("numMboxes " + numMboxes + " should be >=1", numMboxes >=1);
         Assert.assertTrue("totalSize " + totalSize + " should be >=1000", totalSize >=1000);
+    }
+
+    @Test
+    public void getVersionInfoTest() throws Exception {
+        Utility.addSoapAdminAuthHeader((WSBindingProvider)eif);
+        testGetVersionInfoRequest req = new testGetVersionInfoRequest();
+        testGetVersionInfoResponse resp = eif.getVersionInfoRequest(req);
+        Assert.assertNotNull("GetVersionInfoResponse object", resp);
+        testVersionInfo versionInfo = resp.getInfo();
+        Assert.assertNotNull("versionInfo object", versionInfo);
+        String version = versionInfo.getVersion();
+        Assert.assertNotNull("version string", version);
+        System.out.println("ZIMBRA VERSION XXX " + version);
     }
 
     @Test
@@ -1241,6 +1255,7 @@ public class WSDLAdminTest {
         mqd.getQs();  // TODO: For real Q, this would potentially be populated
     }
 
+    @Ignore("Assumes target test machine is local machine")
     @Test
     public void CheckDirectoryTest() throws Exception {
         testCheckDirectoryRequest req = new testCheckDirectoryRequest();
