@@ -176,6 +176,10 @@ public class Utility {
 
     public static void addSoapAuthHeader(WSBindingProvider bp, String authToken)
     throws JAXBException, ParserConfigurationException {
+        try {
+            Thread.sleep(50);  /* avoid danger of number of requests getting throttled */
+        } catch (InterruptedException ie) {
+        }
         JAXBRIContext.newInstance(testHeaderContext.class);
         testHeaderContext zimbraSoapHdrContext = new testHeaderContext();
         zimbraSoapHdrContext.setAuthToken(authToken);
