@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivysettings>
+<settings defaultResolver="chain-resolver" />
+  <caches defaultCacheDir="${dev.home}/.ivy2/cache"/>
+  <resolvers>
+    <chain name="chain-resolver" returnFirst="true">
+      <ibiblio name="maven" m2compatible="true" usepoms="false"/>
+    </chain>
+  </resolvers>
+</ivysettings>

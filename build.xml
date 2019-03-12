@@ -3,7 +3,172 @@
   <!-- Sole purpose of this repo is to test Zimbra's WSDL support.
          Zimbra MUST be fully installed on the same host.
     -->
-  <import file="../zm-zcs/ant-global.xml"/>
+    <!-- Set properties that can be used in all projects. -->
+    <dirname property="zimbra.root.dir" file="${ant.file.ant-global}/../"/>
+    <!-- Java -->
+    <property name="javac.target" value="1.8"/>
+    <!-- base path for ivy cache, local repository, ant libraries, etc -->
+
+    <property name="dev.home"  value="${user.home}"/>
+
+    <!-- Add "init-ivy" depends to your "resolve" target and the following will
+         automatically download and install ivy if necessary. -->
+    <property name="ivy.jar.dir" location="${dev.home}/.ant/lib" />
+    <property name="ivy.install.version" value="2.3.0" />
+    <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy-2.3.0.jar" />
+    <property name="ivy.status" value="integration" />
+    <property name="ivy.organisation" value="zimbra" />
+    <property name="ivy.publish.src.artifacts.pattern" value="build/[artifact]-[revision].[ext]" />
+    <property name="ivy.deliver.ivy.pattern" value="${dev.home}/.zcs-deps/[organisation]/[module]/[module]-[revision].[ext]" />
+    <property name="ivy.module" value="${ant.project.name}" />
+    <target name="download-ivy">
+      <if>
+        <not>
+          <available file="${ivy.jar.file}" type="file"/>
+        </not>
+        <then>
+          <mkdir dir="${ivy.jar.dir}"/>
+          <!-- download Ivy from web site so that it can be used even without any special installation. 
+             Note, that 'get' task will not try downloading if this file is already downloaded. -->
+          <get src="https://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar" 
+             dest="${ivy.jar.file}" usetimestamp="true"/>  
+        </then>
+      </if>
+    </target>
+
+    <target name="init-ivy" depends="download-ivy">
+      <!-- If ivy is not downloaded yet, try to load ivy here from ivy home. -->
+        <path id="ivy.lib.path">
+            <fileset dir="${ivy.jar.dir}" includes="*.jar"/>
+        </path>
+        <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
+        <ivy:settings id="dev.settings" file="ivysettings.xml"/>
+    </target>
+
+    <!-- common resolve target that should work to resolve dependencies based on ivy.xml for most projects -->
+    <target name="resolve" depends="init-ivy" description="resolve dependencies">
+      <ivy:resolve settingsRef="dev.settings" />
+      <ivy:cachepath pathid="class.path" />
+    </target>
+
+    <!-- Ignore the classpath from the shell running ant.  This avoids dependency
+      on the user's environment and suppresses the warning about includeAntRuntime. -->
+    <property name="build.sysclasspath" value="ignore"/>
+
+    <!-- Standard directory paths -->
+    <property name="src.dir" location="src" />
+    <property name="src.java.dir" location="src/java" />
+    <property name="src.bin.dir" location="src/bin" />
+    <property name="jars.dir" location="jars" />
+    <property name="build.dir" location="build" />
+    <property name="build.tmp.dir" location="${build.dir}/tmp" />
+    <property name="build.classes.dir" location="${build.dir}/classes" />
+    <property name="test.dir" location="${build.dir}/test"/>
+    <property name="test.src.dir" location="src/java-test"/>
+    <property name="test.classes.dir" location="${build.dir}/test-classes"/>
+
+    <path id="all.java.path">
+        <pathelement location="${src.java.dir}" />
+    </path>
+    <!-- Standard build dependencies path -->
+    <property name="build.deps.dir" location="${dev.home}/.zcs-deps"/>
+
+    <!-- Classpath for running unit test, it needs classes from build dir -->
+    <path id="test.class.path">
+      <path refid="class.path"/>
+      <pathelement location="${build.classes.dir}" />
+      <pathelement location="${test.classes.dir}" />
+    </path>
+
+    <!-- Build version -->
+    <taskdef resource="net/sf/antcontrib/antlib.xml">
+        <classpath>
+            <pathelement location="${build.deps.dir}/ant-contrib-1.0b1.jar"/>
+        </classpath>
+    </taskdef>
+    <tstamp/>
+
+    <target name="build-init">
+      <mkdir dir="${build.classes.dir}"/>
+    </target>
+
+    <target name="test-compile" depends="compile">
+      <if>
+        <available file="${test.src.dir}" type="dir"/>
+        <then>
+          <mkdir dir="${test.classes.dir}"/>
+            <javac destdir="${test.classes.dir}" srcdir="${test.src.dir}" classpathref="test.class.path"
+               debug="true" target="${javac.target}" encoding="utf-8" />
+            <copy todir="${test.classes.dir}">
+              <fileset dir="${test.src.dir}" excludes="**/*.java"/>
+            </copy>
+         </then>
+      </if>
+    </target>
+
+    <target name="test" depends="test-compile" description="Run unit tests">
+      <if>
+        <available file="${test.src.dir}" type="dir"/>
+        <then>
+          <property name="test.path" refid="test.class.path"/>
+          <delete dir="${test.dir}" quiet="true"/>
+          <mkdir dir="${test.dir}/output"/>
+          <mkdir dir="${test.dir}/report"/>
+          <copy file="${test.src.dir}/log4j-test.properties" tofile="${test.classes.dir}/log4j.properties" failonerror="false"/>
+          <junit printsummary="on" showoutput="true" failureproperty="junit.failure" tempdir="${test.dir}" fork="true">
+            <classpath refid="test.class.path"/>
+            <assertions><enable/></assertions>
+            <formatter type="xml"/>
+            <batchtest todir="${test.dir}/output">
+                <fileset dir="${test.src.dir}">
+                    <include name="**/*Test.java"/>
+                    <exclude name="**/*ITest.java"/>
+                    <exclude name="**/Abstract*Test.java"/>
+                </fileset>
+            </batchtest>
+          </junit>
+          <junitreport todir="${test.dir}/report">
+            <fileset dir="${test.dir}/output"/>
+            <report todir="${test.dir}/report"/>
+          </junitreport>
+          <echo>Test Report: ${test.dir}/report/index.html</echo>
+          <fail if="junit.failure" message="Unit test failed"/>
+        </then>
+        <else>
+          <echo>${test.src.dir} not found. Will not run unit tests</echo>
+        </else>
+      </if>
+    </target>
+
+    <target name="single-test" depends="test-compile" description="Run single unit test">
+        <fail message="test.name must be set - Need e.g. ant -Dtest.name=com.zimbra.soap.WSDLJaxbTest single-test"
+              unless="test.name"/>
+        <property name="single.test.dir" value="${test.dir}-${test.name}"/>
+        <delete dir="${single.test.dir}" quiet="true"/>
+        <mkdir dir="${single.test.dir}/output"/>
+        <mkdir dir="${single.test.dir}/report"/>
+        <copy file="${test.src.dir}/log4j-test.properties" tofile="${test.classes.dir}/log4j.properties" failonerror="false"/>
+        <junit fork="yes" printsummary="on" showoutput="true" failureproperty="junit.failure" tempdir="${single.test.dir}">
+            <classpath refid="test.class.path"/>
+            <assertions><enable/></assertions>
+            <formatter type="xml"/>
+            <test name="${test.name}" todir="${single.test.dir}/output" />
+        </junit>
+        <junitreport todir="${single.test.dir}/report">
+            <fileset dir="${single.test.dir}/output"/>
+            <report todir="${single.test.dir}/report"/>
+        </junitreport>
+        <echo>Test Report: ${single.test.dir}/report/index.html</echo>
+        <fail if="junit.failure" message="Single Unit test failed"/>
+    </target>
+
+    <target name="clean-cache" description="Delete ivy cache">
+        <delete dir="${dev.home}/.ivy2/cache/zimbra/${ant.project.name}"/>
+        <delete dir="${dev.home}/.zcs-deps/zimbra/${ant.project.name}"/>
+        <delete>
+            <fileset dir="${dev.home}/.ivy2/cache" includes="*${ant.project.name}*"/>
+        </delete>
+    </target>
 
   <!-- implementation.title is used by the "zimbra-jar" target -->
   <property name="implementation.title" value="zm-wsdl-test"/>
@@ -14,18 +179,10 @@
   <property name="tools.classes.dir" value="${tools.dir}/classes"/>
   <property name="bindings.src.dir" value="bindings"/>
   <property name="bindings.dir" value="${build.dir}/bindings"/>
+  <property name="soap.server" value="zmc-mailbox"/> <!-- will probably want to over-ride this -->
+  <property name="admin.port" value="7071"/>
 
   <target name="init-url">
-    <exec executable="/opt/zimbra/bin/zmlocalconfig" outputproperty="soap.server" errorproperty="soap.server.err" failonerror="true">
-      <arg line="-m"/>
-      <arg line="nokey"/>
-      <arg line="zimbra_zmprov_default_soap_server"/>
-    </exec>
-    <exec executable="/opt/zimbra/bin/zmlocalconfig" outputproperty="admin.port" errorproperty="admin.port.err" failonerror="true">
-      <arg line="-m"/>
-      <arg line="nokey"/>
-      <arg line="zimbra_admin_service_port"/>
-    </exec>
     <property name="wsdl.src.uri.base" value="https://${soap.server}:${admin.port}/service/wsdl"/>
     <property name="wsdl.file" value="${wsdl.src.uri.base}/ZimbraService.wsdl"/>
   </target>
@@ -36,7 +193,7 @@
   </target>
 
   <target name="resolve-cxf" depends="init-ivy" description="resolve javatool dependencies">
-    <property name="ivy.settings.file" value="../zm-zcs/ivysettings.xml"/>
+    <property name="ivy.settings.file" value="ivysettings.xml"/>
     <ivy:resolve file="ivy-cxf.xml"/>
     <ivy:cachepath pathid="cxf.classpath"/>
   </target>
@@ -97,8 +254,20 @@
   </target>
 
   <target name="zimbra-identity" depends="check-zimbra-identity" unless="ssh.zimbra.identity.present">
-    <exec failonerror="true" executable="/opt/zimbra/bin/zmsshkeygen"/>
+    <exec failonerror="false" executable="/opt/zimbra/bin/zmsshkeygen"/>
   </target>
 
-  <target name="jar" depends="compile,zimbra-jar,zimbra-identity" description="Creates the jar"/>
+  <target name="jar" depends="compile" description="Creates the jar">
+            <jar destfile="${build.dir}/${jar.file}" basedir="${jar.build.dir}" includes="${includes}" excludes="${excludes}">
+                <manifest>
+                    <attribute name="Main-Class" value="com.zimbra.buildinfo.Version" />
+                    <attribute name="Implementation-Vendor" value="Zimbra Software, LLC"/>
+                    <attribute name="Implementation-Title" value="${implementation.title}"/>
+                    <attribute name="Implementation-Version" value="${zimbra.buildinfo.version}"/>
+                    <attribute name="Specification-Vendor" value="Zimbra Software, LLC"/>
+                    <attribute name="Specification-Title" value="Zimbra Collaboration Suite"/>
+                    <attribute name="Specification-Version" value="${zimbra.buildinfo.majorversion}.${zimbra.buildinfo.minorversion}.${zimbra.buildinfo.microversion}"/>
+                </manifest>
+            </jar>
+  </target>
 </project>

@@ -4,23 +4,9 @@ This repository hosts a java client built on top of Zimbra's WSDL definition.
 This acts as both a proof of concept for potential WSDL client developers and a test suite for some
 Zimbra functionality.
 
-## Inputs from Perforce
-
-From `ZimbraSoap`:
-
-- `./build.xml`
-- `./src/wsdl-test/com`
-- `./src/wsdl-test/wsdlBindings-zcs.xml`
-- `./src/wsdl-test/xsdBindings-zcs.xml`
-
-## Dependencies
-
-- `zm-common`
-- `zm-thirdparty-jars`
-
 ## Artifacts
 
-- N/A Sole purpose of this repo is to demonstrate/test Zimbra's WSDL support.  
+- N/A Sole purpose of this repo is to demonstrate/test Zimbra's WSDL support.
 
 ## Requirements
 
@@ -45,11 +31,9 @@ The tests rely on Java API files automatically generated from Zimbra's WSDL defi
 
 The main intention is to validate that correct, working WSDL client software can be written based on our WSDL.
 
-Some tests rely on the data that the classic `zm-store` RunUnitTests framework rely on.  For instance,
-certain data loaded into the **user1** mailbox and some other resources existing.
-
 Some of the tests create and delete mailboxes and other Zimbra artefacts as part of their execution.
 
-### TODO
+You need to specify the system under test using the ant soap.server property  suggest executing using
+the command:
 
-It would be good to have demonstration clients using other programming languages based on our WSDL
+    ant -Dsoap.server=demox.zimbra.com clean test

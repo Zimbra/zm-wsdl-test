@@ -1,4 +1,5 @@
 build/
+src/java/
 .classpath
 .project
-src/java/
+zm-wsdl-test.iml
