@@ -24,6 +24,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sun.xml.ws.developer.WSBindingProvider;
@@ -79,6 +80,7 @@ public class WSDLVolumeAdminTest {
     public void tearDown() throws Exception {
     }
 
+    @Ignore
     @Test
     public void createVolumeTest() throws Exception {
         Utility.deleteVolumeIfExists(testVolume);
@@ -136,6 +138,7 @@ public class WSDLVolumeAdminTest {
         firstVolume.getType();
     }
 
+    @Ignore
     @Test
     public void modifyVolumeTest() throws Exception {
         Short volId = Utility.ensureVolumeExists(testVolume, testVolumePath);
@@ -173,6 +176,7 @@ public class WSDLVolumeAdminTest {
         Assert.assertNotNull("SetCurrentVolumeResponse object", setResp);
     }
 
+    @Ignore
     @Test
     public void getVolumeTest() throws Exception {
         Short volId = Utility.ensureVolumeExists(testVolume, testVolumePath);
@@ -191,6 +195,7 @@ public class WSDLVolumeAdminTest {
                 volId, testVolumeId);
     }
 
+    @Ignore
     @Test
     public void deleteVolumeTest() throws Exception {
         Short volId = Utility.ensureVolumeExists(testVolume, testVolumePath);

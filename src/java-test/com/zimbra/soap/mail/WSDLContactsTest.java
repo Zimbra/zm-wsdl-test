@@ -179,7 +179,7 @@ public class WSDLContactsTest {
         attrs = modCn.getA();
         Assert.assertEquals("ModifiedContact 4 number of attrs", 2, attrs.size());
         tags = modCn.getTn();
-        Assert.assertTrue("ModifiedContact 4 tags", tags == null);
+        Assert.assertTrue("ModifiedContact 4 tags exepected to be null or empty", (tags == null) || tags.isEmpty());
     }
 
     @Test

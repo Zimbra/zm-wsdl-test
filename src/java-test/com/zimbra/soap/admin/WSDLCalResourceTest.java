@@ -191,18 +191,18 @@ public class WSDLCalResourceTest {
 
     @Test
     public void getAllCalendarResourcesTest() throws Exception {
+        String testCalendarResourceId = Utility.ensureCalendarResourceExists(testCalRes, testCalResDisplayName);
         testGetAllCalendarResourcesRequest req = new testGetAllCalendarResourcesRequest();
         Utility.addSoapAdminAuthHeader((WSBindingProvider)eif);
         testGetAllCalendarResourcesResponse resp = eif.getAllCalendarResourcesRequest(req);
         Assert.assertNotNull("GetAllCalendarResourcesResponse object", resp);
         List <testCalendarResourceInfo> calResources = resp.getCalresource();
         int len;
-        Assert.assertNotNull(
-                "GetAllCalendarResourcesResponse list of CalendarResources", calResources);
+        Assert.assertNotNull("GetAllCalendarResourcesResponse list of CalendarResources", calResources);
         len = calResources.size();
-        Assert.assertTrue(
-                "Number of GetAllCalendarResourcesResponse <calResource> children is " +
-                len + " - should be at least 2", len >= 2);
+        Assert.assertTrue("Number of GetAllCalendarResourcesResponse <calResource> children is " +
+                len + " - should be at least 1", len >= 1);
+        Utility.deleteCalendarResourceIfExists(testCalRes);
     }
 
     @Test
